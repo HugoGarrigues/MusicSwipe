@@ -1,0 +1,22 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Track {
+  id          Int      @id @default(autoincrement()) // identifiant interne
+  spotifyId   String?  @unique                      // identifiant externe Spotify
+  title       String
+  artistName  String?
+  albumName   String?
+  duration    Int?
+  previewUrl  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
