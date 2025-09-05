@@ -3,6 +3,7 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ConflictException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class TracksService {
@@ -35,7 +36,14 @@ export class TracksService {
     });
   }
 
-  remove(id: number) {
-    return this.prisma.track.delete({ where: { id } });
+  async remove(id: number) {
+    try {
+      return await this.prisma.track.delete({ where: { id } });
+    } catch (e: any) {
+      if (e.code === 'P2025') {
+        throw new NotFoundException(`Track with id ${id} not found`);
+      }
+      throw e;
+    }
   }
 }
