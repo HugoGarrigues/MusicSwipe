@@ -2,12 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class TracksService {
   constructor(private prisma: PrismaService) {}
-  create(createTrackDto: CreateTrackDto) {
-    return 'This action adds a new track';
+  
+
+  async create(createTrackDto: CreateTrackDto) {
+  try {
+    return await this.prisma.track.create({ data: createTrackDto });
+  } catch (error) {
+    if (error.code === 'P2002') {
+      throw new ConflictException('A track with this Spotify ID already exists.');
+    }
+    throw error;
+  }
   }
 
   findAll() {
@@ -15,14 +25,17 @@ export class TracksService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} track`;
+    return this.prisma.track.findUnique({ where: { id } });
   }
 
   update(id: number, updateTrackDto: UpdateTrackDto) {
-    return `This action updates a #${id} track`;
+       return this.prisma.track.update({
+      where: { id },
+      data: updateTrackDto,
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} track`;
+    return this.prisma.track.delete({ where: { id } });
   }
 }
