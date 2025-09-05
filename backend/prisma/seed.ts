@@ -1,36 +1,47 @@
 // prisma/seed.ts
-
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+const roundsOfHashing = 10;
+
 async function main() {
-  // Users
+  
+  const adminPassword = await bcrypt.hash('Admin@123', roundsOfHashing);
+  const userPassword = await bcrypt.hash('User@123', roundsOfHashing);
+
+  // Admin user
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@musicswipe.test' },
-    update: {},
+    update: {
+      password: adminPassword, 
+    },
     create: {
       email: 'admin@musicswipe.test',
       username: 'admin',
-      password: 'Admin@123',
+      password: adminPassword,
       isAdmin: true,
       avatarUrl: 'https://i.pravatar.cc/150?u=admin',
     },
   });
 
+  // Normal user
   const normalUser = await prisma.user.upsert({
     where: { email: 'user@musicswipe.test' },
-    update: {},
+    update: {
+      password: userPassword,
+    },
     create: {
       email: 'user@musicswipe.test',
       username: 'user',
-      password: 'User@123',
+      password: userPassword,
       isAdmin: false,
       avatarUrl: 'https://i.pravatar.cc/150?u=user',
     },
   });
 
-  // Tracks
+  // Deux tracks d’exemple
   const track1 = await prisma.track.upsert({
     where: { spotifyId: '3n3Ppam7vgaVa1iaRUc9Lp' },
     update: {},
