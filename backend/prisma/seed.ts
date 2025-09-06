@@ -115,6 +115,21 @@ async function main() {
       ],
     });
   }
+
+  // Actions (catalogue d'actions applicatives)
+  await prisma.action.createMany({
+    data: [
+      { name: 'LIKE_TRACK', description: 'User likes a track' },
+      { name: 'UNLIKE_TRACK', description: 'User unlikes a track' },
+      { name: 'RATE_TRACK', description: 'User rates a track' },
+      { name: 'COMMENT_TRACK', description: 'User comments on a track' },
+      { name: 'FOLLOW_USER', description: 'User follows another user' },
+      { name: 'UNFOLLOW_USER', description: 'User unfollows another user' },
+      { name: 'SPOTIFY_AUTH', description: 'User authenticates via Spotify' },
+      { name: 'PLAY_PREVIEW', description: 'User plays a track preview' },
+    ],
+    skipDuplicates: true,
+  });
 }
 
 main()
