@@ -86,7 +86,8 @@ export class SpotifyService {
    */
   async refreshToken(refreshToken: string): Promise<SpotifyTokenResponse> {
     try {
-      const response = await axios.post('https://accounts.spotify.com/api/token',
+      const response = await axios.post(
+        'https://accounts.spotify.com/api/token',
         new URLSearchParams({
           grant_type: 'refresh_token',
           refresh_token: refreshToken,
@@ -94,15 +95,31 @@ export class SpotifyService {
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64')}`,
+            Authorization: `Basic ${Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64')}`,
           },
-        }
+        },
       );
-
       return response.data;
     } catch (error) {
-      throw new UnauthorizedException('Impossible de rafraîchir le token');
+      throw new UnauthorizedException("Impossible de rafraîchir le token");
     }
   }
 
+  /**
+   * Dernières écoutes de l'utilisateur (Spotify Recently Played)
+   */
+  async getRecentlyPlayed(accessToken: string, limit = 20): Promise<{ items: any[] }> {
+    try {
+      const response = await axios.get('https://api.spotify.com/v1/me/player/recently-played', {
+        params: { limit },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.status === 401) {
+        throw new UnauthorizedException('Spotify token expired or invalid');
+      }
+      throw new BadRequestException('Unable to fetch recently played tracks from Spotify');
+    }
+  }
 }

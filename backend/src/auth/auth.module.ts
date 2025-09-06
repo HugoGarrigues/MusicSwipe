@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
@@ -21,9 +21,10 @@ export const jwtSecret = process.env.JWT_SECRET as string;
       secret: jwtSecret,
       signOptions: { expiresIn: '5m' }, 
     }),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, SpotifyService],
+  exports: [SpotifyService],
 })
 export class AuthModule {}
