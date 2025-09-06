@@ -102,6 +102,19 @@ async function main() {
     // Respecte @@unique([userId, trackId]) et évite les doublons si on relance la seed
     skipDuplicates: true,
   });
+
+  // Comments d'exemple (n'insère que si aucune donnée pour éviter les doublons à la relance)
+  const commentCount = await prisma.comment.count();
+  if (commentCount === 0) {
+    await prisma.comment.createMany({
+      data: [
+        { userId: adminUser.id,  trackId: track1.id, content: "Banger absolu, l'intro est mythique." },
+        { userId: adminUser.id,  trackId: track2.id, content: "Toujours un classique pour ambiancer la salle." },
+        { userId: normalUser.id, trackId: track1.id, content: "J'adore le riff de guitare." },
+        { userId: normalUser.id, trackId: track2.id, content: "Impossible de ne pas chanter." },
+      ],
+    });
+  }
 }
 
 main()
