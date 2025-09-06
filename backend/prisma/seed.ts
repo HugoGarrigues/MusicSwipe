@@ -69,6 +69,15 @@ async function main() {
   });
 
   console.log({ adminUser, normalUser, track1, track2 });
+
+  // Relations de follow d'exemple
+  await prisma.follow.createMany({
+    data: [
+      { followerId: adminUser.id, followedId: normalUser.id },
+      { followerId: normalUser.id, followedId: adminUser.id },
+    ],
+    skipDuplicates: true,
+  });
 }
 
 main()
