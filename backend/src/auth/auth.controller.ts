@@ -102,6 +102,7 @@ export class AuthController {
     }
   })
   @ApiResponse({ status: 404, description: 'Aucun compte Spotify lié trouvé' })
+  @ApiResponse({ status: 409, description: 'Impossible de délier - risque de perte d\'accès au compte' })
   unlinkSpotifyAccount(@Req() req: any) {
     return this.authService.unlinkSpotifyAccount(req.user.id);
   }

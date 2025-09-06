@@ -170,19 +170,38 @@ export class AuthService {
    * Délier un compte Spotify d'un utilisateur
    */
   async unlinkSpotifyAccount(userId: number): Promise<{ message: string }> {
-    const oauthAccount = await this.prisma.userOAuth.findFirst({
-      where: {
-        userId: userId,
-        provider: 'spotify',
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        oauthAccounts: true,
       },
     });
 
-    if (!oauthAccount) {
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    const spotifyAccount = user.oauthAccounts.find(
+      account => account.provider === 'spotify'
+    );
+
+    if (!spotifyAccount) {
       throw new NotFoundException('Aucun compte Spotify lié trouvé');
     }
 
+    const hasPassword = !!user.password;
+    const hasOtherOAuthAccounts = user.oauthAccounts.some(
+      account => account.provider !== 'spotify'
+    );
+
+    if (!hasPassword && !hasOtherOAuthAccounts) {
+      throw new ConflictException(
+        'Impossible de délier le compte Spotify. Vous devez d\'abord définir un mot de passe ou lier un autre compte de connexion pour éviter de perdre l\'accès à votre compte.'
+      );
+    }
+
     await this.prisma.userOAuth.delete({
-      where: { id: oauthAccount.id },
+      where: { id: spotifyAccount.id },
     });
 
     return { message: 'Compte Spotify délié avec succès' };
