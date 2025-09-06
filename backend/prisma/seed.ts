@@ -90,6 +90,18 @@ async function main() {
     // Respecte @@unique([userId, trackId]) et évite les doublons si on relance la seed
     skipDuplicates: true,
   });
+
+  // Likes d'exemple
+  await prisma.like.createMany({
+    data: [
+      { userId: adminUser.id,  trackId: track1.id },
+      { userId: adminUser.id,  trackId: track2.id },
+      { userId: normalUser.id, trackId: track1.id },
+      // volontairement pas de like pour normalUser sur track2 pour varier
+    ],
+    // Respecte @@unique([userId, trackId]) et évite les doublons si on relance la seed
+    skipDuplicates: true,
+  });
 }
 
 main()
