@@ -78,6 +78,18 @@ async function main() {
     ],
     skipDuplicates: true,
   });
+
+  // Ratings d'exemple (échelle 1-5)
+  await prisma.rating.createMany({
+    data: [
+      { userId: adminUser.id,  trackId: track1.id, score: 5 },
+      { userId: adminUser.id,  trackId: track2.id, score: 4 },
+      { userId: normalUser.id, trackId: track1.id, score: 3 },
+      { userId: normalUser.id, trackId: track2.id, score: 5 },
+    ],
+    // Respecte @@unique([userId, trackId]) et évite les doublons si on relance la seed
+    skipDuplicates: true,
+  });
 }
 
 main()
