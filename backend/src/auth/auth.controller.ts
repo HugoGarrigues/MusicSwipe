@@ -4,7 +4,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthEntity } from './entity/auth.entity';
 import { LoginDto } from './dto/login.dto';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from './jwt/jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Get, Req } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
