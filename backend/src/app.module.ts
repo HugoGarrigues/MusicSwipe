@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { FollowsModule } from './follows/follows.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { LikesModule } from './likes/likes.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LikesModule } from './likes/likes.module';
     FollowsModule,
     RatingsModule,
     LikesModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

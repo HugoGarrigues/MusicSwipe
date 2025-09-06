@@ -19,6 +19,7 @@ model Track {
   updatedAt  DateTime @updatedAt
   Rating     Rating[]
   Like       Like[]
+  Comment    Comment[]
 }
 
 model User {
@@ -37,6 +38,7 @@ model User {
   followers     Follow[]    @relation("UserFollowedBy")
   Rating        Rating[]
   Like          Like[]
+  Comment       Comment[]
 }
 
 model UserOAuth {
@@ -96,4 +98,19 @@ model Like {
   track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
 
   @@unique([userId, trackId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  trackId   Int
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@index([trackId])
+  @@index([userId])
 }
