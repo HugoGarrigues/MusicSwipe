@@ -7,6 +7,7 @@ import { TracksModule } from './tracks/tracks.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { FollowsModule } from './follows/follows.module';
+import { RatingsModule } from './ratings/ratings.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { FollowsModule } from './follows/follows.module';
     TracksModule, 
     UsersModule, 
     AuthModule,
-    FollowsModule
+    FollowsModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

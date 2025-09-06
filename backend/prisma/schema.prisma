@@ -8,60 +8,77 @@ datasource db {
 }
 
 model Track {
-  id          Int      @id @default(autoincrement())
-  spotifyId   String?  @unique
-  title       String
-  artistName  String?
-  albumName   String?
-  duration    Int?
-  previewUrl  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  spotifyId  String?  @unique
+  title      String
+  artistName String?
+  albumName  String?
+  duration   Int?
+  previewUrl String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Rating     Rating[]
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  username   String   @unique
-  password   String?
-  isAdmin    Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  avatarUrl  String?
-  
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String?
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  avatarUrl String?
+
   // Relations
   oauthAccounts UserOAuth[]
-  following     Follow[] @relation("UserFollows")
-  followers     Follow[] @relation("UserFollowedBy")
+  following     Follow[]    @relation("UserFollows")
+  followers     Follow[]    @relation("UserFollowedBy")
+  Rating        Rating[]
 }
 
 model UserOAuth {
-  id                Int      @id @default(autoincrement())
-  userId            Int
-  provider          String   
-  providerUserId    String
-  accessToken       String?
-  refreshToken      String?
-  tokenExpires      DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  provider       String
+  providerUserId String
+  accessToken    String?
+  refreshToken   String?
+  tokenExpires   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerUserId])
 }
 
 model Follow {
-  id          Int      @id @default(autoincrement())
-  followerId  Int      // utilisateur qui suit
-  followedId  Int      // utilisateur suivi
-  createdAt   DateTime @default(now())
-  
+  id         Int      @id @default(autoincrement())
+  followerId Int // utilisateur qui suit
+  followedId Int // utilisateur suivi
+  createdAt  DateTime @default(now())
+
   // Relations
-  follower    User     @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
-  followed    User     @relation("UserFollowedBy", fields: [followedId], references: [id], onDelete: Cascade)
-  
+  follower User @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  followed User @relation("UserFollowedBy", fields: [followedId], references: [id], onDelete: Cascade)
+
   @@unique([followerId, followedId])
   @@index([followerId])
   @@index([followedId])
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  trackId   Int
+  score     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trackId])
 }
