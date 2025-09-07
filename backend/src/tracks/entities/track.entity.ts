@@ -2,6 +2,9 @@
 
 import { Track } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { LikeEntity } from 'src/likes/entities/like.entity';
+import { CommentEntity } from 'src/comments/entities/comment.entity';
+import { RatingEntity } from 'src/ratings/entities/rating.entity';
 
 export class TrackEntity implements Track {
   @ApiProperty()
@@ -30,4 +33,14 @@ export class TrackEntity implements Track {
 
   @ApiProperty()
   updatedAt: Date;
+
+  // Relations (optional in responses)
+  @ApiProperty({ type: [LikeEntity], required: false })
+  Like?: LikeEntity[];
+
+  @ApiProperty({ type: [CommentEntity], required: false })
+  Comment?: CommentEntity[];
+
+  @ApiProperty({ type: [RatingEntity], required: false })
+  Rating?: RatingEntity[];
 }

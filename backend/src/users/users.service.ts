@@ -80,7 +80,7 @@ export class UsersService {
   /**
    * Tracks récents de l'utilisateur (basés sur l'activité: like/rate/comment)
    */
-  async getRecentTracks(userId: number, take = 20) {
+  async getRecentTracks(userId: number, take: number) {
     // 1) Récupère les credentials Spotify liés à l'utilisateur
     const oauth = await this.prisma.userOAuth.findFirst({
       where: { userId, provider: 'spotify' },
