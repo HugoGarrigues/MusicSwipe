@@ -1,98 +1,197 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# MusicSwipe API — Endpoints
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Ce document liste les endpoints exposés par l’API NestJS du dossier `backend`.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- Base URL par défaut: `http://localhost:3000`
+- Authentification: JWT Bearer pour les routes protégées
+- Documentation Swagger: `http://localhost:3000/api`
 
-## Description
+## Auth (`/auth`)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- POST `/auth/login`
+  - Public
+  - Corps: `{ email: string, password: string }`
+  - Retourne le token et l’utilisateur (AuthEntity)
 
-## Project setup
+- GET `/auth/me`
+  - Protégé (Bearer JWT)
+  - Retourne l’identité de l’utilisateur connecté
 
-```bash
-$ npm install
-```
+- GET `/auth/spotify/auth-url`
+  - Public
+  - Génère l’URL d’autorisation Spotify
 
-## Compile and run the project
+- POST `/auth/spotify/auth`
+  - Public
+  - Corps: `{ code: string }` (voir `SpotifyAuthDto`)
+  - Authentifie via Spotify (crée ou connecte un compte)
 
-```bash
-# development
-$ npm run start
+- GET `/auth/spotify/link-url`
+  - Protégé (Bearer JWT)
+  - Génère l’URL pour lier un compte Spotify
 
-# watch mode
-$ npm run start:dev
+- POST `/auth/spotify/link`
+  - Protégé (Bearer JWT)
+  - Corps: `{ code: string }` (voir `SpotifyLinkDto`)
+  - Lie le compte Spotify à l’utilisateur connecté
 
-# production mode
-$ npm run start:prod
-```
+- POST `/auth/spotify/unlink`
+  - Protégé (Bearer JWT)
+  - Délie le compte Spotify de l’utilisateur connecté
 
-## Run tests
+## Users (`/users`)
 
-```bash
-# unit tests
-$ npm run test
+- POST `/users`
+  - Public
+  - Crée un utilisateur (CreateUserDto)
 
-# e2e tests
-$ npm run test:e2e
+- GET `/users`
+  - Protégé (Bearer JWT)
+  - Liste des utilisateurs (UserEntity[])
 
-# test coverage
-$ npm run test:cov
-```
+- GET `/users/:id`
+  - Protégé (Bearer JWT)
+  - Récupère un utilisateur par id (UserEntity)
 
-## Deployment
+- PATCH `/users/:id`
+  - Protégé (Bearer JWT)
+  - Met à jour un utilisateur (UpdateUserDto)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- DELETE `/users/:id`
+  - Protégé (Bearer JWT)
+  - Supprime un utilisateur
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- GET `/users/me/recent-tracks?take=<number>`
+  - Protégé (Bearer JWT)
+  - Renvoie les pistes récemment écoutées, `take` (optionnel, max 100, défaut 10)
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## Tracks (`/tracks`)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- POST `/tracks`
+  - Public
+  - Crée une piste (CreateTrackDto)
 
-## Resources
+- GET `/tracks`
+  - Public
+  - Liste toutes les pistes (TrackEntity[])
 
-Check out a few resources that may come in handy when working with NestJS:
+- GET `/tracks/:id`
+  - Public
+  - Détail d’une piste par id (TrackEntity)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- PATCH `/tracks/:id`
+  - Public
+  - Met à jour une piste (UpdateTrackDto)
 
-## Support
+- DELETE `/tracks/:id`
+  - Public
+  - Supprime une piste
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Likes (`/likes`)
 
-## Stay in touch
+- POST `/likes`
+  - Protégé (Bearer JWT)
+  - Corps: `{ trackId: number }`
+  - Like une piste (LikeEntity)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- DELETE `/likes/track/:trackId`
+  - Protégé (Bearer JWT)
+  - Retire le like sur la piste
 
-## License
+- GET `/likes`
+  - Protégé (Bearer JWT)
+  - Liste des likes de l’utilisateur (LikeEntity[])
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- GET `/likes/track/:trackId`
+  - Protégé (Bearer JWT)
+  - Retourne l’état du like pour une piste: `{ trackId, liked }`
+
+## Comments (`/comments`)
+
+- POST `/comments`
+  - Protégé (Bearer JWT)
+  - Corps: `CreateCommentDto`
+  - Crée un commentaire (CommentEntity)
+
+- GET `/comments?userId=<number>&trackId=<number>`
+  - Protégé (Bearer JWT)
+  - Filtrage optionnel par `userId` et/ou `trackId` (CommentEntity[])
+
+- GET `/comments/:id`
+  - Protégé (Bearer JWT)
+  - Détail d’un commentaire (CommentEntity)
+
+- PATCH `/comments/:id`
+  - Protégé (Bearer JWT)
+  - Met à jour un commentaire (UpdateCommentDto)
+
+- DELETE `/comments/:id`
+  - Protégé (Bearer JWT)
+  - Supprime un commentaire
+
+## Ratings (`/ratings`)
+
+- POST `/ratings`
+  - Protégé (Bearer JWT)
+  - Corps: `CreateRatingDto`
+  - Crée une note (RatingEntity)
+
+- GET `/ratings?userId=<number>&trackId=<number>`
+  - Protégé (Bearer JWT)
+  - Filtrage optionnel par `userId` et/ou `trackId` (RatingEntity[])
+
+- GET `/ratings/:id`
+  - Protégé (Bearer JWT)
+  - Détail d’une note (RatingEntity)
+
+- PATCH `/ratings/:id`
+  - Protégé (Bearer JWT)
+  - Met à jour une note (UpdateRatingDto)
+
+- DELETE `/ratings/:id`
+  - Protégé (Bearer JWT)
+  - Supprime une note
+
+- GET `/ratings/track/:trackId/average`
+  - Protégé (Bearer JWT)
+  - Renvoie `{ trackId, average, count }` pour la piste
+
+## Follows (`/follows`)
+
+- POST `/follows`
+  - Protégé (Bearer JWT)
+  - Corps: `{ userId: number }` (FollowUserDto)
+  - Suivre un utilisateur (FollowEntity)
+
+- DELETE `/follows/:userId`
+  - Protégé (Bearer JWT)
+  - Ne plus suivre un utilisateur
+
+- GET `/follows/stats/:userId`
+  - Protégé (Bearer JWT)
+  - Statistiques de suivi d’un utilisateur (followers, following)
+
+- GET `/follows/following/:userId`
+  - Protégé (Bearer JWT)
+  - Liste des utilisateurs suivis (UserFollowInfoDto[])
+
+- GET `/follows/followers/:userId`
+  - Protégé (Bearer JWT)
+  - Liste des followers (UserFollowInfoDto[])
+
+- GET `/follows/check/:userId`
+  - Protégé (Bearer JWT)
+  - Vérifie si l’utilisateur connecté suit `userId` → `{ isFollowing: boolean }`
+
+## Racine (`/`)
+
+- GET `/`
+  - Public
+  - Retourne un message de santé depuis `AppController.getHello()`
+
+---
+
+Notes:
+- Les schémas précis des DTOs sont visibles dans le code (`backend/src/**/dto`) et via Swagger.
+- Les entités sérialisées sont visibles dans `backend/src/**/entities`.
+- Assurez-vous d’envoyer le header `Authorization: Bearer <token>` pour les routes protégées.
