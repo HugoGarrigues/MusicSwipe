@@ -59,7 +59,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: TrackEntity, isArray: true })
   async recentTracks(@Req() req: any, @Query('take') take?: string) {
-    const limit = take ? Math.min(Number(take) || 20, 50) : 20;
+    const limit = take ? Math.min(Number(take) || 10, 100) : 10;
     const tracks = await this.usersService.getRecentTracks(req.user.id, limit);
     return tracks;
   }

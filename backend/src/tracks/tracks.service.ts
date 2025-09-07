@@ -22,11 +22,25 @@ export class TracksService {
   }
 
   findAll() {
-    return this.prisma.track.findMany({ where: { id: { not: -1 } } });
+    return this.prisma.track.findMany({
+      where: { id: { not: -1 } },
+      include: {
+        Like: true,
+        Comment: true,
+        Rating: true,
+      },
+    });
   }
 
   findOne(id: number) {
-    return this.prisma.track.findUnique({ where: { id } });
+    return this.prisma.track.findUnique({
+      where: { id },
+      include: {
+        Like: true,
+        Comment: true,
+        Rating: true,
+      },
+    });
   }
 
   update(id: number, updateTrackDto: UpdateTrackDto) {
