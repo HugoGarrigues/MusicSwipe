@@ -52,7 +52,7 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-md relative">
-        <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-2xl ring-1 ring-black/5 p-8">
+        <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-2xl ring-1 ring-black/5 p-6">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-white/30 opacity-90" />
             <h1 className="text-white">Connexion</h1>
@@ -115,7 +115,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 inline-flex items-center justify-center rounded-md bg-white text-black font-medium px-4 py-2 border border-white/10 shadow-lg hover:bg-black hover:text-white transition-colors disabled:opacity-60"
+              className="mt-2 w-full relative inline-flex items-center justify-center rounded-md bg-white text-black font-medium px-4 py-2 border border-white/10 shadow-[0_8px_30px_rgba(255,255,255,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:bg-white/95 hover:text-black hover:shadow-[0_12px_40px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:translate-y-0 active:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? "Connexion..." : "Se connecter"}
             </button>
