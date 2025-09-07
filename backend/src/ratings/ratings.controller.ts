@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query,
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateRatingDto } from './dto/create-rating.dto';
+import { CreateRatingSpotifyDto } from './dto/create-rating-spotify.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 import { RatingEntity } from './entities/rating.entity';
 import { RatingsService } from './ratings.service';
@@ -17,6 +18,12 @@ export class RatingsController {
   @ApiCreatedResponse({ type: RatingEntity })
   create(@Req() req: any, @Body() dto: CreateRatingDto) {
     return this.ratingsService.create(req.user.id, dto);
+  }
+
+  @Post('spotify')
+  @ApiCreatedResponse({ type: RatingEntity, description: 'Upsert track by spotifyId then upsert rating' })
+  createBySpotify(@Req() req: any, @Body() dto: CreateRatingSpotifyDto) {
+    return this.ratingsService.upsertBySpotify(req.user.id, dto);
   }
 
   @Get()
