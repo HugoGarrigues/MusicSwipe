@@ -27,29 +27,10 @@ export const SidebarMenu: React.FC = () => {
             <path d="M18.75 12.75a5.25 5.25 0 0 1 3 4.725v.775H16.5v-.775a6.72 6.72 0 0 0-1.23-3.84 6.72 6.72 0 0 1 3.48-.885h0Z"/>
           </svg>
         );
-      case "comments":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={cls}>
-            <path d="M4.5 4.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-4.5 3V6A1.5 1.5 0 0 1 4.5 4.5Z"/>
-          </svg>
-        );
-      case "likes":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={cls}>
-            <path d="M11.645 20.91 3.61 12.875a5.25 5.25 0 1 1 7.424-7.425l.966.966.966-.966a5.25 5.25 0 0 1 7.424 7.425L12.355 20.91a.5.5 0 0 1-.71 0Z"/>
-          </svg>
-        );
-      case "ratings":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={cls}>
-            <path d="M11.48 3.499a.75.75 0 0 1 1.04 0l2.125 2.01a.75.75 0 0 0 .53.22h2.35a.75.75 0 0 1 .42 1.34l-1.9 1.8a.75.75 0 0 0-.22.53v2.35a.75.75 0 0 1-1.34.42l-1.8-1.9a.75.75 0 0 0-.53-.22h-2.35a.75.75 0 0 1-.42-1.34l1.9-1.8a.75.75 0 0 0 .22-.53v-2.35a.75.75 0 0 1 .42-1.34l2.125-2.01Z"/>
-            <path d="M4.5 10.5a7.5 7.5 0 1 1 15 0v3a7.5 7.5 0 0 1-15 0v-3Z"/>
-          </svg>
-        );
       case "tracks":
         return (
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={cls}>
-            <path d="M12 3.75a8.25 8.25 0 1 1 0 16.5 8.25 8.25 0 0 1 0-16.5ZM10.5 6a1.5 1.5 0 1 0 0 3h7.5a1.5 1.5 0 1 0 0-3h-7.5ZM6.75 12a1.5 1.5 0 1 0 0 3h10.5a1.5 1.5 0 1 0 0-3H6.75ZM9.75 17.25a1.5 1.5 0 1 0 0 3h4.5a1.5 1.5 0 1 0 0-3h-4.5Z"/>
+            <path d="M9.75 3v10.5a3.75 3.75 0 1 0 1.5 2.925V8.625l7.5-2.25v7.125a3.75 3.75 0 1 0 1.5 2.925V3h-10.5Z"/>
           </svg>
         );
       case "settings":

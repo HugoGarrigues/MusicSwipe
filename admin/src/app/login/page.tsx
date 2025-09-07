@@ -55,7 +55,7 @@ export default function LoginPage() {
         <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-2xl ring-1 ring-black/5 p-6">
           <div className="mb-6 text-center">
             <h1 className="text-white">Connexion</h1>
-            <p className="text-white/70 text-sm">Accédez au panneau d'administration</p>
+            <p className="text-white/70 text-sm">Accédez au dashboard administrateur</p>
           </div>
 
           {error && (
@@ -78,7 +78,7 @@ export default function LoginPage() {
                 <input
                   id="email"
                   type="email"
-                  placeholder="vous@exemple.com"
+                  placeholder="test@exemple.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
@@ -119,10 +119,6 @@ export default function LoginPage() {
               {loading ? "Connexion..." : "Se connecter"}
             </button>
           </form>
-
-          <div className="mt-6 text-center text-xs text-white/60">
-            En vous connectant, vous acceptez les conditions d'utilisation.
-          </div>
         </div>
       </div>
     </div>
