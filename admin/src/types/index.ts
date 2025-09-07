@@ -33,6 +33,13 @@ export type Rating = {
   updatedAt: string;
 };
 
+export type Like = {
+  id: number;
+  userId: number;
+  trackId: number;
+  createdAt: string;
+};
+
 export type Track = {
   id: number;
   spotifyId?: string | null;
@@ -40,8 +47,6 @@ export type Track = {
   artistName?: string | null;
   albumName?: string | null;
   duration?: number | null;
-  previewUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 };
-
