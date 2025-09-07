@@ -4,8 +4,9 @@ import routerProvider from "@refinedev/nextjs-router";
 import { Metadata } from "next";
 import React, { Suspense } from "react";
 
-import { dataProvider } from "@providers/data-provider";
-import "@styles/global.css";
+import { dataProvider } from "@/providers/data-provider";
+import "@/styles/global.css";
+import "@/styles/scrollbar.css";
 
 export const metadata: Metadata = {
   title: "Refine",
