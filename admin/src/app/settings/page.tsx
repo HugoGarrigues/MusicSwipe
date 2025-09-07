@@ -85,9 +85,8 @@ export default function SettingsPage() {
       setMe({ id: updated.id, email: updated.email, username: updated.username, isAdmin: updated.isAdmin, avatarUrl: updated.avatarUrl ?? undefined });
       setPassword("");
       setPassword2("");
-      setSaveMsg("Modifications enregistrées ✅");
     } catch (e) {
-      setSaveMsg((e as any)?.message ?? "Erreur lors de l'enregistrement");
+      return;
     } finally {
       setSaving(false);
     }
@@ -108,10 +107,11 @@ export default function SettingsPage() {
           <HeaderProfileCard user={me} />
           <div className="h-4" />
 
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 flex justify-center">
+            <div className="w-full h-full">
             <GlassPanel title="Mon profil">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-1">
+              <div className="flex flex-col items-center gap-6">
+                <div className="w-full max-w-md">
                   <div className="flex flex-col items-center gap-3">
                     <div className="h-24 w-24 rounded-full bg-white/10 border border-white/20 overflow-hidden flex items-center justify-center">
                       {avatarUrl ? (
@@ -127,10 +127,9 @@ export default function SettingsPage() {
                       placeholder="URL de l'avatar"
                       className="w-full h-10 px-3 rounded-md bg-white/5 text-white placeholder-white/60 border-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40"
                     />
-                    <div className="text-xs text-white/50 text-center">Astuce: utilisez un lien https vers votre image</div>
                   </div>
                 </div>
-                <div className="md:col-span-2 space-y-4">
+                <div className="w-full max-w-md space-y-4">
                   <div>
                     <label className="block text-xs text-white/60 mb-1">Pseudo</label>
                     <input
@@ -150,7 +149,7 @@ export default function SettingsPage() {
                       className="w-full h-10 px-3 rounded-md bg-white/5 text-white placeholder-white/60 border-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40"
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     <div>
                       <label className="block text-xs text-white/60 mb-1">Nouveau mot de passe (optionnel)</label>
                       <input
@@ -173,7 +172,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className="pt-2 flex items-center gap-3">
+                  <div className="pt-2 flex items-center justify-center gap-3">
                     <button
                       disabled={!canSave || saving}
                       onClick={onSave}
@@ -187,6 +186,7 @@ export default function SettingsPage() {
               </div>
               {loading && <div className="mt-6 text-white/60 text-sm">Chargement…</div>}
             </GlassPanel>
+            </div>
           </div>
         </div>
       </div>
