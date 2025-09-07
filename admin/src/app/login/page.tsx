@@ -54,7 +54,6 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative">
         <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-2xl ring-1 ring-black/5 p-6">
           <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-white/30 opacity-90" />
             <h1 className="text-white">Connexion</h1>
             <p className="text-white/70 text-sm">Accédez au panneau d'administration</p>
           </div>
