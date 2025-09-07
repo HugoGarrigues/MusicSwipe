@@ -19,7 +19,7 @@ export const jwtSecret = process.env.JWT_SECRET as string;
     ConfigModule,
     JwtModule.register({
       secret: jwtSecret,
-      signOptions: { expiresIn: '5m' }, 
+      signOptions: { expiresIn: '7d' },
     }),
     forwardRef(() => UsersModule),
   ],

@@ -105,12 +105,12 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen w-full p-6 md:p-8 bg-gradient-to-br from-black via-slate-950 to-black text-white">
-      <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
+      <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
         <aside className="h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-3 md:p-4 shadow-[0_8px_30px_rgba(255,255,255,0.05)]">
           <SidebarMenu />
         </aside>
 
-        <div>
+        <div className="h-full flex flex-col overflow-hidden">
           {error && (
             <div className="mb-6 text-red-200 bg-red-500/20 border border-red-400/30 rounded-md p-3 text-sm">
               {error}
@@ -120,16 +120,16 @@ export default function DashboardPage() {
           <HeaderProfileCard user={me} />
           <div className="h-4" />
 
-          <div className="flex flex-col min-h-[calc(100vh-200px)]">
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <StatCard title="Nombre d'utilisateurs" value={numUsers} />
               <StatCard title="Note moyenne" value={averageRating} suffix="/5" />
               <StatCard title="Nombre de titres" value={numTracks} />
             </div>
 
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
               <GlassPanel title="Gestion des Utilisateurs">
-                <UsersList users={users} />
+                <UsersList users={me ? users.filter((u) => u.id !== me.id) : users} />
               </GlassPanel>
 
               <GlassPanel title="Titres Spotify">
