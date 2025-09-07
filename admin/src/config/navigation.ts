@@ -1,4 +1,4 @@
-export type SidebarIcon = "dashboard" | "users" | "tracks" | "comments" | "likes" | "ratings";
+export type SidebarIcon = "dashboard" | "users" | "tracks" | "settings";
 
 export type SidebarItem = {
   href: string;
@@ -9,6 +9,6 @@ export type SidebarItem = {
 export const SIDEBAR_ITEMS: readonly SidebarItem[] = [
   { href: "/", label: "Dashboard", icon: "dashboard" },
   { href: "/users", label: "Utilisateurs", icon: "users" },
-  { href: "/tracks", label: "Titres", icon: "tracks" }
+  { href: "/tracks", label: "Titres", icon: "tracks" },
+  { href: "/settings", label: "Paramètres", icon: "settings" },
 ] as const;
-
