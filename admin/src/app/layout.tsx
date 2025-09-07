@@ -6,7 +6,6 @@ import React, { Suspense } from "react";
 
 import { dataProvider } from "@/providers/data-provider";
 import "@/styles/global.css";
-import "@/styles/scrollbar.css";
 
 export const metadata: Metadata = {
   title: "Refine",

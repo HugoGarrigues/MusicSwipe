@@ -35,5 +35,10 @@ export class LikesController {
   isLiked(@Req() req: any, @Param('trackId', ParseIntPipe) trackId: number) {
     return this.likesService.isLiked(req.user.id, trackId);
   }
-}
 
+  @Get('track/:trackId/count')
+  @ApiOkResponse({ description: 'Nombre de likes pour une piste', schema: { properties: { trackId: { type: 'number' }, count: { type: 'number' } } } })
+  countByTrack(@Param('trackId', ParseIntPipe) trackId: number) {
+    return this.likesService.countByTrack(trackId);
+  }
+}

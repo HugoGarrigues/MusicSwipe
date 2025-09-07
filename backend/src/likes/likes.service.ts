@@ -35,5 +35,12 @@ export class LikesService {
     const like = await this.prisma.like.findUnique({ where: { userId_trackId: { userId, trackId } } });
     return { trackId, liked: !!like };
   }
-}
 
+  async countByTrack(trackId: number) {
+    const track = await this.prisma.track.findUnique({ where: { id: trackId } });
+    if (!track) throw new NotFoundException(`Track with id ${trackId} not found`);
+
+    const count = await this.prisma.like.count({ where: { trackId } });
+    return { trackId, count };
+  }
+}

@@ -9,9 +9,6 @@ export type SidebarItem = {
 export const SIDEBAR_ITEMS: readonly SidebarItem[] = [
   { href: "/", label: "Dashboard", icon: "dashboard" },
   { href: "/users", label: "Utilisateurs", icon: "users" },
-  { href: "/tracks", label: "Titres", icon: "tracks" },
-  { href: "/comments", label: "Commentaires", icon: "comments" },
-  { href: "/likes", label: "Likes", icon: "likes" },
-  { href: "/ratings", label: "Notes", icon: "ratings" },
+  { href: "/tracks", label: "Titres", icon: "tracks" }
 ] as const;
 
