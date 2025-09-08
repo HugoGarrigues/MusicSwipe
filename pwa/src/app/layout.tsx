@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,13 +16,7 @@ export const metadata: Metadata = {
   title: "MusicSwipe",
   description: "Découvrez et likez de la musique avec MusicSwipe.",
   applicationName: "MusicSwipe",
-  themeColor: "#111827",
   manifest: "/manifest.webmanifest",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    viewportFit: "cover",
-  },
   appleWebApp: {
     capable: true,
     title: "MusicSwipe",
@@ -43,6 +37,13 @@ export const metadata: Metadata = {
       { url: "/assets/branding/logo.png", type: "image/png" },
     ],
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#111827",
 };
 
 export default function RootLayout({
