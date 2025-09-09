@@ -1,0 +1,27 @@
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+
+export const api = {
+  me: () => `${API_URL}/auth/me`,
+  users: () => `${API_URL}/users`,
+  user: (id: number | string) => `${API_URL}/users/${id}`,
+  userRecentTracks: (take?: number) => `${API_URL}/users/me/recent-tracks${take ? `?take=${take}` : ""}`,
+  follows: () => `${API_URL}/follows`,
+  followUser: () => `${API_URL}/follows`,
+  unfollowUser: (userId: number | string) => `${API_URL}/follows/${userId}`,
+  followStats: (userId: number | string) => `${API_URL}/follows/stats/${userId}`,
+  following: (userId: number | string) => `${API_URL}/follows/following/${userId}`,
+  followers: (userId: number | string) => `${API_URL}/follows/followers/${userId}`,
+  followCheck: (userId: number | string) => `${API_URL}/follows/check/${userId}`,
+  comments: () => `${API_URL}/comments`,
+  comment: (id: number | string) => `${API_URL}/comments/${id}`,
+  ratings: () => `${API_URL}/ratings`,
+  ratingAverageByTrack: (trackId: number | string) => `${API_URL}/ratings/track/${trackId}/average`,
+  tracks: () => `${API_URL}/tracks`,
+  track: (id: number | string) => `${API_URL}/tracks/${id}`,
+  commentsByTrack: (trackId: number | string) => `${API_URL}/comments?trackId=${trackId}`,
+  likes: () => `${API_URL}/likes`,
+  likeStatusByTrack: (trackId: number | string) => `${API_URL}/likes/track/${trackId}`,
+  likeCountByTrack: (trackId: number | string) => `${API_URL}/likes/track/${trackId}/count`,
+  likeTrack: () => `${API_URL}/likes`,
+  unlikeTrack: (trackId: number | string) => `${API_URL}/likes/track/${trackId}`,
+} as const;
