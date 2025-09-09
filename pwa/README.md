@@ -34,3 +34,22 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Project Structure (MusicSwipe PWA)
+
+- `src/app/(app)/*`: main in-app pages with a bottom navigation
+  - `/discover`: swipe experience to discover tracks
+  - `/search`: search for tracks or users
+  - `/tracks` and `/tracks/[id]`: list and detail of tracks
+  - `/likes`: liked tracks
+  - `/users/[id]`: user profile
+  - `/settings`: preferences & auth shortcuts
+- `src/app/(auth)/*`: authentication routes
+  - `/login`: login screen (placeholder)
+  - `/callback`: OAuth callback to store token
+- `src/components/*`: reusable UI and feature components
+- `src/config/*`: navigation and API endpoints
+- `src/lib/http.ts`: small fetch helpers
+- `src/types/index.ts`: shared TypeScript types
+
+The home route `/` redirects to `/discover`.

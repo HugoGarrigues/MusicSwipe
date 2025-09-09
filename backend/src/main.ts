@@ -8,7 +8,14 @@ import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-cl
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
+    // Allow local dev (PWA on 3002) from localhost and common LAN ranges
     origin: [
+      /^http:\/\/localhost:3002$/,
+      /^http:\/\/127\.0\.0\.1:3002$/,
+      /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:3002$/,
+      /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:3002$/,
+      /^http:\/\/172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}:3002$/,
+      // Keep generic localhost allowance for other frontends (admin, etc.)
       /^(http:\/\/localhost:\d{4,5})$/,
       /^(http:\/\/127\.0\.0\.1:\d{4,5})$/,
     ],
