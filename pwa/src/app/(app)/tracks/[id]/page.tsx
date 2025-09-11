@@ -1,12 +1,13 @@
 "use client";
 
 import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
 import RatingStars from "@/components/ui/RatingStars";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { api } from "@/config/api";
 import { get, post } from "@/lib/http";
 import { useEffect, useMemo, useState } from "react";
-import type { Track, Rating, RatingAverage } from "@/types";
+import type { Track, Rating, RatingAverage, Comment } from "@/types";
 import Image from "next/image";
 import { ArrowLeft, MoreVertical, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,8 @@ export default function TrackDetailPage({ params }: Props) {
   const [avg, setAvg] = useState<RatingAverage | null>(null);
   const [ratings, setRatings] = useState<Rating[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [comments, setComments] = useState<Comment[] | null>(null);
+  const [newComment, setNewComment] = useState("");
 
   async function refreshRatings() {
     if (!token) { setRatings(null); setAvg(null); return; }
@@ -48,6 +51,14 @@ export default function TrackDetailPage({ params }: Props) {
   }, [id, token]);
 
   useEffect(() => { refreshRatings(); }, [id, token]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const cs = await get<Comment[]>(api.commentsByTrack(id), token ? { token } : {});
+        setComments(cs);
+      } catch {}
+    })();
+  }, [id, token]);
 
   const dist = useMemo(() => {
     const d = [0,0,0,0,0];
@@ -62,6 +73,20 @@ export default function TrackDetailPage({ params }: Props) {
       await refreshRatings();
     } catch (e) {
       const message = e instanceof Error ? e.message : "Erreur rating";
+      alert(message);
+    }
+  }
+
+  async function submitComment() {
+    if (!token) return alert("Connectez-vous pour commenter");
+    if (!newComment.trim()) return;
+    try {
+      await post(api.comments(), { trackId: id, content: newComment.trim() }, { token });
+      setNewComment("");
+      const cs = await get<Comment[]>(api.commentsByTrack(id), { token });
+      setComments(cs);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Erreur commentaire";
       alert(message);
     }
   }
@@ -132,11 +157,44 @@ export default function TrackDetailPage({ params }: Props) {
                 <div className="text-sm">{track.artistName ?? "—"}</div>
               </div>
               <div className="p-3">
+                <div className="text-xs text-white/60">Release Date</div>
+                <div className="text-sm">{track.releaseDate ?? "—"}</div>
+              </div>
+              <div className="p-3">
                 <div className="text-xs text-white/60">Duration</div>
                 <div className="text-sm">{formatDuration(track.duration ?? undefined)}</div>
               </div>
             </div>
           </Card>
+
+          {/* Comments */}
+          <section className="flex flex-col gap-2">
+            {token && (
+              <Card className="p-3">
+                <div className="flex gap-2">
+                  <input
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Votre commentaire"
+                    className="flex-1 bg-transparent border border-white/10 rounded px-3 py-2 outline-none"
+                  />
+                  <Button variant="primary" onClick={submitComment}>Envoyer</Button>
+                </div>
+              </Card>
+            )}
+            {comments?.length ? (
+              <Card className="divide-y divide-white/5">
+                {comments.map((c) => (
+                  <div key={c.id} className="p-3">
+                    <div className="text-sm">{c.content}</div>
+                    <div className="text-xs text-white/50">#{c.id}</div>
+                  </div>
+                ))}
+              </Card>
+            ) : (
+              <Card className="p-3 text-white/70">Aucun commentaire pour le moment</Card>
+            )}
+          </section>
         </>
       )}
     </div>
