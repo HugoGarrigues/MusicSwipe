@@ -7,9 +7,10 @@ type Props = {
   children: React.ReactNode;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
+  className?: string;
 };
 
-export default function SwipeCard({ children, onSwipeLeft, onSwipeRight }: Props) {
+export default function SwipeCard({ children, onSwipeLeft, onSwipeRight, className = "" }: Props) {
   const startX = useRef<number | null>(null);
   const [dx, setDx] = useState(0);
 
@@ -30,7 +31,8 @@ export default function SwipeCard({ children, onSwipeLeft, onSwipeRight }: Props
 
   return (
     <Card
-      className="p-4 select-none touch-pan-y"
+      variant="plain"
+      className={`select-none touch-pan-y bg-transparent border-0 shadow-none ${className}`}
       onMouseDown={(e) => handleStart(e.clientX)}
       onMouseMove={(e) => startX.current != null && handleMove(e.clientX)}
       onMouseUp={handleEnd}
@@ -44,4 +46,3 @@ export default function SwipeCard({ children, onSwipeLeft, onSwipeRight }: Props
     </Card>
   );
 }
-
