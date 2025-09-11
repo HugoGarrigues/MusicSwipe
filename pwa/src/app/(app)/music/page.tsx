@@ -2,9 +2,9 @@
 
 import GlassPanel from "@/components/ui/GlassPanel";
 import RatingStars from "@/components/ui/RatingStars";
-import RatingHistogram from "@/components/ui/RatingHistogram";
 import Button from "@/components/ui/Button";
-import { useEffect, useState } from "react";
+import SwipeActionBar from "@/components/track/SwipeActionBar";
+import { useEffect, useRef, useState } from "react";
 import type { Track, RatingAverage } from "@/types";
 import { get, post, del } from "@/lib/http";
 import { api } from "@/config/api";
@@ -16,16 +16,42 @@ export default function MusicPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [avg, setAvg] = useState<RatingAverage | null>(null);
   const [liked, setLiked] = useState<boolean>(false);
+  const [comment, setComment] = useState("");
+  const sizeRef = useRef(25);
+  const seenRef = useRef<Set<number>>(new Set());
 
   const track = tracks[index];
 
   useEffect(() => {
+    // reset session window on auth change
+    seenRef.current.clear();
+    sizeRef.current = 25;
     (async () => {
-      const list = await get<Track[]>(api.tracks());
-      setTracks(list);
-      setIndex(0);
+      try {
+        if (token) {
+          const recents = await get<Track[]>(api.userRecentTracks(sizeRef.current), { token });
+          if (recents?.length) {
+            setTracks(recents);
+            setIndex(0);
+            return;
+          }
+          const list = await get<Track[]>(api.tracks(), { token });
+          setTracks(list);
+          setIndex(0);
+        } else {
+          const list = await get<Track[]>(api.tracks());
+          setTracks(list);
+          setIndex(0);
+        }
+      } catch {
+        try {
+          const list = await get<Track[]>(api.tracks(), token ? { token } : {});
+          setTracks(list);
+          setIndex(0);
+        } catch {}
+      }
     })();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (!track) return;
@@ -56,26 +82,77 @@ export default function MusicPage() {
     setLiked(!!s?.liked);
   }
 
-  function next() { setIndex((i) => Math.min(i + 1, Math.max(tracks.length - 1, 0))); }
+  async function submitComment() {
+    if (!token || !track) return alert("Connectez-vous");
+    if (!comment.trim()) return;
+    try {
+      await post(api.comments(), { trackId: track.id, content: comment.trim() }, { token });
+      setComment("");
+    } catch {}
+  }
+
+  async function reloadTracks(increment = false) {
+    if (increment) sizeRef.current = Math.min(50, sizeRef.current + 10);
+    try {
+      let list: Track[] = [];
+      if (token) {
+        list = await get<Track[]>(api.userRecentTracks(sizeRef.current), { token });
+        if (!list?.length) {
+          list = await get<Track[]>(api.tracks(), { token });
+        }
+      } else {
+        list = await get<Track[]>(api.tracks());
+      }
+      const seen = seenRef.current;
+      let filtered = (list ?? []).filter((t) => !seen.has(t.id));
+      if (!filtered.length && token && sizeRef.current < 50) {
+        sizeRef.current = Math.min(50, sizeRef.current + 10);
+        const bigger = await get<Track[]>(api.userRecentTracks(sizeRef.current), { token });
+        filtered = (bigger ?? []).filter((t) => !seen.has(t.id));
+      }
+      if (filtered.length) {
+        filtered.forEach((t) => seen.add(t.id));
+        setTracks(filtered);
+        setIndex(0);
+      } else {
+        seen.clear();
+        setTracks(list ?? []);
+        setIndex(0);
+      }
+    } catch {}
+  }
+
+  function next() {
+    setIndex((i) => {
+      const ni = i + 1;
+      if (ni >= tracks.length) {
+        reloadTracks(true);
+        return 0;
+      }
+      return ni;
+    });
+  }
   function prev() { setIndex((i) => Math.max(i - 1, 0)); }
 
   return (
-    <div className="flex flex-col gap-4 pb-24">
-      <div className="rounded-3xl p-5" style={{ background: "linear-gradient(160deg, #3b0764 0%, #0b0b0f 70%)" }}>
+    <div className="flex flex-col gap-4 pb-24" >
+      <div className="rounded-3xl p-5">
         <div className="text-center text-white/80 text-xs mb-3">{track ? track.albumName ?? "" : ""}</div>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-64 h-64 rounded-2xl bg-white/10" />
+          {track?.coverUrl ? (
+            <img
+              src={track.coverUrl}
+              alt={track.title}
+              width={256}
+              height={256}
+              className="w-64 h-64 rounded-2xl object-cover"
+            />
+          ) : (
+            <div className="w-64 h-64 rounded-2xl bg-white/10" />
+          )}
           <div className="text-lg font-semibold">{track?.title ?? "Chargement…"}</div>
           <div className="text-sm text-white/70">{track?.artistName ?? ""}</div>
-          <RatingStars value={Math.round(avg?.average ?? 0)} onChange={handleRate} />
-          <div className="flex items-center gap-2">
-            <RatingHistogram bars={[1,2,3,4,8,12,8,6,5,2]} count={avg?.average ?? 0} />
-          </div>
-          <div className="flex gap-2 mt-2">
-            <Button variant="outline" onClick={prev}>◀</Button>
-            <Button variant="outline" onClick={toggleLike}>{liked ? "💔" : "❤️"}</Button>
-            <Button variant="outline" onClick={next}>▶</Button>
-          </div>
+          <RatingStars value={Math.round(avg?.average ?? 0)} onChange={handleRate} />     
         </div>
       </div>
 
@@ -87,6 +164,7 @@ export default function MusicPage() {
           </GlassPanel>
         ))}
       </div>
+
     </div>
   );
 }

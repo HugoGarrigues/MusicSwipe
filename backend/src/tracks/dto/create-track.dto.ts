@@ -27,6 +27,10 @@ export class CreateTrackDto {
   @IsOptional() @IsInt() @IsPositive()
   duration?: number;
 
+  @ApiProperty({ required: false, example: 'https://i.scdn.co/image/ab67616d00001e0263f...' })
+  @IsOptional() @IsUrl()
+  coverUrl?: string;
+
   @ApiProperty({ required: false, example: 'https://p.scdn.co/mp3-preview/xxxx' })
   @IsOptional() @IsUrl()
   previewUrl?: string;

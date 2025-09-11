@@ -14,16 +14,11 @@ export class RatingsService {
       throw new NotFoundException(`Track with id ${dto.trackId} not found`);
     }
 
-    try {
-      return await this.prisma.rating.create({
-        data: { userId, trackId: dto.trackId, score: dto.score },
-      });
-    } catch (e: any) {
-      if (e.code === 'P2002') {
-        throw new ConflictException('You have already rated this track');
-      }
-      throw e;
-    }
+    return this.prisma.rating.upsert({
+      where: { userId_trackId: { userId, trackId: dto.trackId } },
+      create: { userId, trackId: dto.trackId, score: dto.score },
+      update: { score: dto.score },
+    });
   }
 
   async findAll(params?: { userId?: number; trackId?: number }) {

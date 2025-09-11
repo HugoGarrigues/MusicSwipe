@@ -14,6 +14,7 @@ export type Track = {
   title: string;
   artistName: string | null;
   albumName: string | null;
+  coverUrl: string | null;
   duration: number | null;
   previewUrl: string | null;
   createdAt: string;

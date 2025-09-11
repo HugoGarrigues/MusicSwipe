@@ -19,13 +19,14 @@ export default function TrackDetailPage({ params }: Props) {
   const [avg, setAvg] = useState<RatingAverage | null>(null);
   const [liked, setLiked] = useState<boolean>(false);
   const [comments, setComments] = useState<Comment[] | null>(null);
+  const [newComment, setNewComment] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const [t, a] = await Promise.all([
-          get<Track>(api.track(id)),
+          get<Track>(api.track(id), token ? { token } : {}),
           get<RatingAverage>(api.ratingAverageByTrack(id), token ? { token } : {}),
         ]);
         setTrack(t);
@@ -76,6 +77,20 @@ export default function TrackDetailPage({ params }: Props) {
     }
   }
 
+  async function submitComment() {
+    if (!token) return alert("Connectez-vous pour commenter");
+    if (!newComment.trim()) return;
+    try {
+      await post(api.comments(), { trackId: id, content: newComment.trim() }, { token });
+      setNewComment("");
+      const cs = await get<Comment[]>(api.commentsByTrack(id), { token });
+      setComments(cs);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Erreur commentaire";
+      alert(message);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {error && <Card className="p-3 text-red-400">{error}</Card>}
@@ -84,6 +99,15 @@ export default function TrackDetailPage({ params }: Props) {
         <>
           <h1 className="text-xl font-semibold">{track.title}</h1>
           <Card className="p-4">
+            {track.coverUrl ? (
+              <img
+                src={track.coverUrl}
+                alt={track.title}
+                width={256}
+                height={256}
+                className="w-64 h-64 rounded-xl object-cover mb-4"
+              />
+            ) : null}
             <div className="text-base font-semibold">{track.title}</div>
             <div className="text-sm text-white/70">{track.artistName ?? "Artiste inconnu"}</div>
             <div className="mt-3 flex items-center gap-3">
@@ -96,6 +120,19 @@ export default function TrackDetailPage({ params }: Props) {
           </div>
           <section className="flex flex-col gap-2">
             <h2 className="text-lg font-semibold">Commentaires</h2>
+            {token && (
+              <Card className="p-3">
+                <div className="flex gap-2">
+                  <input
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Votre commentaire"
+                    className="flex-1 bg-transparent border border-white/10 rounded px-3 py-2 outline-none"
+                  />
+                  <Button variant="primary" onClick={submitComment}>Envoyer</Button>
+                </div>
+              </Card>
+            )}
             {comments?.length ? (
               <Card className="divide-y divide-white/5">
                 {comments.map((c) => (

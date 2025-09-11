@@ -23,6 +23,9 @@ export class TrackEntity implements Track {
   albumName: string | null;
 
   @ApiProperty({ required: false, nullable: true })
+  coverUrl: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
   duration: number | null;
 
   @ApiProperty({ required: false, nullable: true })

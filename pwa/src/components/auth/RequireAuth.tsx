@@ -1,22 +1,27 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuthContext } from "@/providers/AuthProvider";
-import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthContext();
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-[50vh] grid place-items-center">
-        <Card className="p-6 text-center bg-white/5 border-white/10 backdrop-blur-xl rounded-2xl">
-          <div className="text-white/80 mb-3">Veuillez vous connecter pour accéder à cette section.</div>
-          <a href="/login"><Button>Se connecter</Button></a>
-        </Card>
-      </div>
-    );
+  const { isAuthenticated, ready } = useAuthContext();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!ready) return; // wait until token is loaded
+    if (!isAuthenticated) {
+      const next = pathname ? `?next=${encodeURIComponent(pathname)}` : "";
+      router.replace(`/login${next}`);
+    }
+  }, [isAuthenticated, ready, router, pathname]);
+
+  if (!ready) {
+    // Avoid flashing content while we determine auth state
+    return null;
   }
+  if (!isAuthenticated) return null; // will be redirected
   return <>{children}</>;
 }
 

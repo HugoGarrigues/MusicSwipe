@@ -1,13 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, UseGuards, } from '@nestjs/common';
 import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { TrackEntity } from './entities/track.entity';
 import { ParseIntPipe, Query } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('tracks')
 @ApiTags('Tracks')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class TracksController {
   constructor(private readonly tracksService: TracksService) {}
 
