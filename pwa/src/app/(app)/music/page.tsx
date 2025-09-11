@@ -3,7 +3,7 @@
 import GlassPanel from "@/components/ui/GlassPanel";
 import RatingStars from "@/components/ui/RatingStars";
 import { useEffect, useRef, useState } from "react";
-import type { Track, RatingAverage } from "@/types";
+import type { Track, RatingAverage, Rating, User } from "@/types";
 import { get, post, del } from "@/lib/http";
 import { api } from "@/config/api";
 import { useAuthContext } from "@/providers/AuthProvider";
@@ -19,6 +19,7 @@ export default function MusicPage() {
   const [comment, setComment] = useState("");
   const sizeRef = useRef(25);
   const seenRef = useRef<Set<number>>(new Set());
+  const ratedRef = useRef<Set<number>>(new Set());
 
   const track = tracks[index];
 
@@ -26,17 +27,28 @@ export default function MusicPage() {
     // reset session window on auth change
     seenRef.current.clear();
     sizeRef.current = 25;
+    ratedRef.current.clear();
     (async () => {
       try {
         if (token) {
+          // Load user's rated tracks to filter them out
+          try {
+            const me = await get<User>(api.me(), { token });
+            const rs = await get<Rating[]>(`${api.ratings()}?userId=${me.id}`, { token }).catch(() => []);
+            ratedRef.current = new Set((rs ?? []).map((r) => r.trackId));
+          } catch {}
+
+          // Try recent tracks first, then fallback to all tracks
           const recents = await get<Track[]>(api.userRecentTracks(sizeRef.current), { token });
           if (recents?.length) {
-            setTracks(recents);
+            const filtered = recents.filter((t) => !ratedRef.current.has(t.id));
+            setTracks(filtered);
             setIndex(0);
             return;
           }
           const list = await get<Track[]>(api.tracks(), { token });
-          setTracks(list);
+          const filtered = (list ?? []).filter((t) => !ratedRef.current.has(t.id));
+          setTracks(filtered);
           setIndex(0);
         } else {
           const list = await get<Track[]>(api.tracks());
@@ -46,7 +58,8 @@ export default function MusicPage() {
       } catch {
         try {
           const list = await get<Track[]>(api.tracks(), token ? { token } : {});
-          setTracks(list);
+          const filtered = token ? (list ?? []).filter((t) => !ratedRef.current.has(t.id)) : list;
+          setTracks(filtered ?? []);
           setIndex(0);
         } catch {}
       }
@@ -72,6 +85,22 @@ export default function MusicPage() {
     await post(api.ratings(), { trackId: track.id, score: v }, { token });
     const a = await get<RatingAverage>(api.ratingAverageByTrack(track.id), { token });
     setAvg(a);
+    // Mark as rated locally and remove from current list
+    ratedRef.current.add(track.id);
+    const currentId = track.id;
+    const currentIndex = index;
+    // Prune the rated track from the list and keep pointer on the next one
+    setTracks((prev) => {
+      const nextList = prev.filter((t) => t.id !== currentId);
+      if (!nextList.length) {
+        // No more tracks locally, try to reload a bigger window
+        reloadTracks(true);
+      } else {
+        // Keep index pointing to the same position which is now the next track
+        setIndex(Math.min(currentIndex, nextList.length - 1));
+      }
+      return nextList;
+    });
   }
 
   async function toggleLike() {
@@ -86,6 +115,7 @@ export default function MusicPage() {
   useEffect(() => {
     setDiscoverState({ track: track ?? null, liked });
     setDiscoverActions({
+      prev,
       next,
       toggleLike: async () => { await toggleLike(); },
       rate: async (score: number) => { await handleRate(score); },
@@ -106,11 +136,11 @@ export default function MusicPage() {
         list = await get<Track[]>(api.tracks());
       }
       const seen = seenRef.current;
-      let filtered = (list ?? []).filter((t) => !seen.has(t.id));
-      if (!filtered.length && token && sizeRef.current < 50) {
+      let filtered = (list ?? []).filter((t) => !seen.has(t.id) && !ratedRef.current.has(t.id));
+      if (!filtered.length && token && sizeRef.current < 500) {
         sizeRef.current = Math.min(50, sizeRef.current + 10);
         const bigger = await get<Track[]>(api.userRecentTracks(sizeRef.current), { token });
-        filtered = (bigger ?? []).filter((t) => !seen.has(t.id));
+        filtered = (bigger ?? []).filter((t) => !seen.has(t.id) && !ratedRef.current.has(t.id));
       }
       if (filtered.length) {
         filtered.forEach((t) => seen.add(t.id));
@@ -118,7 +148,8 @@ export default function MusicPage() {
         setIndex(0);
       } else {
         seen.clear();
-        setTracks(list ?? []);
+        const filteredAll = (list ?? []).filter((t) => !ratedRef.current.has(t.id));
+        setTracks(filteredAll);
         setIndex(0);
       }
     } catch {}

@@ -8,6 +8,7 @@ export type DiscoverState = {
 };
 
 export type DiscoverActions = {
+  prev: () => void;
   next: () => void;
   toggleLike: () => Promise<void> | void;
   rate: (score: number) => Promise<void> | void;
@@ -21,6 +22,7 @@ const state: DiscoverState = {
 };
 
 let actions: DiscoverActions = {
+  prev: () => {},
   next: () => {},
   toggleLike: async () => {},
   rate: async () => {},

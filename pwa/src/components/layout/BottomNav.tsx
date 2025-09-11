@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { TABS, TabIcon } from "@/config/navigation";
 import GlassPanel from "@/components/ui/GlassPanel";
 import { getDiscoverActions, getDiscoverState, subscribeDiscover } from "@/store/discover";
-import { Star, Heart, Plus, ExternalLink, SkipForward, Home as HomeIcon, Music as MusicIcon, User as UserIcon } from "lucide-react";
+import { Heart, Plus, ExternalLink, SkipForward, SkipBack, Home as HomeIcon, Music as MusicIcon, User as UserIcon } from "lucide-react";
 
 function Icon({ name, active }: { name: TabIcon; active: boolean }) {
   const cls = active ? "opacity-100" : "opacity-75";
@@ -28,7 +28,6 @@ export default function BottomNav() {
 
   const [track, setTrack] = useState(getDiscoverState().track);
   const [liked, setLiked] = useState(getDiscoverState().liked);
-  const [myRating, setMyRating] = useState(0);
   const actions = getDiscoverActions();
 
   useEffect(() => {
@@ -38,15 +37,15 @@ export default function BottomNav() {
     });
   }, []);
 
-  useEffect(() => { setMyRating(0); }, [track?.id]);
+  // no-op for prev/next exposure only
 
   return (
     <nav className="fixed bottom-3 left-0 right-0 mx-auto max-w-md px-4">
       {onMusic ? (
         <div className="grid grid-cols-5 gap-2 mb-2">
           <GlassPanel hideHeader className="p-0 aspect-square overflow-hidden group transition-all duration-150 hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] active:scale-95">
-            <button aria-label="Augmenter la note" onClick={() => { const nv = (myRating % 5) + 1; setMyRating(nv); actions.rate?.(nv); }} className="w-full h-full grid place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
-              <Star className="w-6 h-6 text-white/90 transition-transform duration-150 ease-out group-hover:scale-105" />
+            <button aria-label="Précédent" onClick={() => actions.prev?.()} className="w-full h-full grid place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+              <SkipBack className="w-6 h-6 text-white/90 transition-transform duration-150 ease-out group-hover:scale-105" />
             </button>
           </GlassPanel>
           <GlassPanel hideHeader className="p-0 aspect-square overflow-hidden group transition-all duration-150 hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] active:scale-95">
