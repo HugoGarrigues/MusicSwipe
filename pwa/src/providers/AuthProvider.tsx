@@ -8,6 +8,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   saveToken: (t: string) => void;
   clearToken: () => void;
+  ready: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,8 +16,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const value = useMemo(
-    () => ({ token: auth.token, isAuthenticated: auth.isAuthenticated, saveToken: auth.saveToken, clearToken: auth.clearToken }),
-    [auth.token, auth.isAuthenticated, auth.saveToken, auth.clearToken]
+    () => ({ token: auth.token, isAuthenticated: auth.isAuthenticated, saveToken: auth.saveToken, clearToken: auth.clearToken, ready: auth.ready }),
+    [auth.token, auth.isAuthenticated, auth.saveToken, auth.clearToken, auth.ready]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

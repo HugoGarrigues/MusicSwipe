@@ -37,7 +37,11 @@ export default function LikesPage() {
           <div className="flex flex-col divide-y divide-white/5 rounded-xl border border-white/10 bg-white/5">
             {likes.map((l) => (
               <div key={l.id} className="p-3 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-white/10" />
+                {l.track?.coverUrl ? (
+                  <img src={l.track.coverUrl} alt={l.track.title} width={40} height={40} className="w-10 h-10 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-white/10" />
+                )}
                 <div className="flex-1">
                   <div className="text-sm">{l.track?.title ?? `Track #${l.trackId}`}</div>
                   <div className="text-xs text-white/60">{l.track?.artistName ?? "—"}</div>

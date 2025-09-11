@@ -20,14 +20,21 @@ export default function HomePage() {
   useEffect(() => {
     (async () => {
       try {
-        const list = await get<Track[]>(api.tracks());
+        if (token) {
+          const recents = await get<Track[]>(api.userRecentTracks(20), { token });
+          if (recents?.length) {
+            setTracks(recents);
+            return;
+          }
+        }
+        const list = await get<Track[]>(api.tracks(), token ? { token } : {});
         setTracks(list);
       } catch (e) {
         const message = e instanceof Error ? e.message : "Erreur tracks";
         setError(message);
       }
     })();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -59,7 +66,11 @@ export default function HomePage() {
               {(tracks ?? []).slice(0, 10).map((t) => (
                 <a key={t.id} href={`/tracks/${t.id}`}>
                   <GlassPanel className="min-w-[120px] p-3 flex flex-col items-center gap-2">
-                    <div className="w-[96px] h-[96px] rounded-xl bg-white/10" />
+                    {t.coverUrl ? (
+                      <img src={t.coverUrl} alt={t.title} width={96} height={96} className="w-[96px] h-[96px] rounded-xl object-cover" />
+                    ) : (
+                      <div className="w-[96px] h-[96px] rounded-xl bg-white/10" />
+                    )}
                     <div className="text-xs font-medium truncate max-w-[96px]">{t.title}</div>
                     <div className="text-[10px] text-white/60 truncate max-w-[96px]">{t.artistName ?? "—"}</div>
                   </GlassPanel>
@@ -93,7 +104,11 @@ export default function HomePage() {
             {filtered.slice(0, 20).map((t) => (
               <a key={t.id} href={`/tracks/${t.id}`} className="block p-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/10" />
+                  {t.coverUrl ? (
+                    <img src={t.coverUrl} alt={t.title} width={40} height={40} className="w-10 h-10 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-white/10" />
+                  )}
                   <div className="flex-1">
                     <div className="text-sm">{t.title}</div>
                     <div className="text-xs text-white/60">{t.artistName ?? "—"}</div>

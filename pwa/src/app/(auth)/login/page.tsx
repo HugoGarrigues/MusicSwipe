@@ -3,29 +3,36 @@
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { post } from "@/lib/http";
 import { API_URL } from "@/config/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthContext } from "@/providers/AuthProvider";
 
-export default function LoginPage() {
+function LoginInner() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { saveToken } = useAuthContext();
+  const params = useSearchParams();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      const res = await post<{ access_token: string }>(`${API_URL}/auth/login`, { email, password });
-      if (res && res.access_token) {
-        saveToken(res.access_token);
-        router.replace("/home");
+      const res = await post<{ access_token?: string; accessToken?: string }>(`${API_URL}/auth/login`, { email, password });
+      const token = res?.access_token || res?.accessToken;
+      if (token) {
+        saveToken(token);
+        try {
+          // Preload recent listens right after login
+          await fetch(`${API_URL}/users/me/recent-tracks?take=25`, { headers: { Authorization: `Bearer ${token}` } });
+        } catch {}
+        const next = params.get("next");
+        router.replace(next || "/home");
       } else {
         setError("Identifiants invalides");
       }
@@ -36,6 +43,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
+
   return (
     <div className="min-h-dvh grid place-items-center px-4">
       <Card className="w-full max-w-sm p-6 flex flex-col gap-4 bg-white/5 border-white/10 backdrop-blur-xl rounded-2xl">
@@ -61,6 +69,10 @@ export default function LoginPage() {
           variant="outline"
           onClick={async () => {
             try {
+              const next = params.get("next");
+              if (next) {
+                try { localStorage.setItem("ms_next", next); } catch {}
+              }
               const res = await fetch(`${API_URL}/auth/spotify/auth-url`);
               const data = await res.json();
               if (data?.authUrl) window.location.href = data.authUrl as string;
@@ -71,5 +83,13 @@ export default function LoginPage() {
         </Button>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginInner />
+    </Suspense>
   );
 }

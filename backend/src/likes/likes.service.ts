@@ -28,7 +28,7 @@ export class LikesService {
   }
 
   async myLikes(userId: number) {
-    return this.prisma.like.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } });
+    return this.prisma.like.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, include: { track: true } });
   }
 
   async isLiked(userId: number, trackId: number) {

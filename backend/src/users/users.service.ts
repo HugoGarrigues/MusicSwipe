@@ -133,6 +133,7 @@ export class UsersService {
       title: string;
       artistName?: string;
       albumName?: string;
+      coverUrl?: string;
       duration?: number;
       previewUrl?: string;
     }[];
@@ -147,6 +148,7 @@ export class UsersService {
         title: t.name,
         artistName: t.artists?.map((a) => a.name).join(', '),
         albumName: t.album?.name,
+        coverUrl: (t.album?.images?.[1]?.url ?? t.album?.images?.[0]?.url) || undefined,
         duration: t.duration_ms ? Math.round(t.duration_ms / 1000) : undefined,
         previewUrl: t.preview_url ?? undefined,
       });
@@ -157,26 +159,30 @@ export class UsersService {
 
     // 4) Upsert dans la table Track pour cohérence de type et réutilisation côté app
     await Promise.all(
-      ordered.map((data) =>
-        this.prisma.track.upsert({
+      ordered.map((data) => {
+        const updateData: any = {
+          title: data.title,
+          artistName: data.artistName,
+          albumName: data.albumName,
+          coverUrl: data.coverUrl,
+          duration: data.duration,
+          previewUrl: data.previewUrl,
+        };
+        const createData: any = {
+          spotifyId: data.spotifyId,
+          title: data.title,
+          artistName: data.artistName,
+          albumName: data.albumName,
+          coverUrl: data.coverUrl,
+          duration: data.duration,
+          previewUrl: data.previewUrl,
+        };
+        return this.prisma.track.upsert({
           where: { spotifyId: data.spotifyId },
-          update: {
-            title: data.title,
-            artistName: data.artistName,
-            albumName: data.albumName,
-            duration: data.duration,
-            previewUrl: data.previewUrl,
-          },
-          create: {
-            spotifyId: data.spotifyId,
-            title: data.title,
-            artistName: data.artistName,
-            albumName: data.albumName,
-            duration: data.duration,
-            previewUrl: data.previewUrl,
-          },
-        })
-      )
+          update: updateData,
+          create: createData,
+        });
+      })
     );
 
     const spotifyIds = ordered.map((o) => o.spotifyId);

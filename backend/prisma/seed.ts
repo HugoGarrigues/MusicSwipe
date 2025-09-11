@@ -1,4 +1,3 @@
-// prisma/seed.ts
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
@@ -11,7 +10,6 @@ async function main() {
   const adminPassword = await bcrypt.hash('Admin@123', roundsOfHashing);
   const userPassword = await bcrypt.hash('User@123', roundsOfHashing);
 
-  // Admin user
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@musicswipe.test' },
     update: {
@@ -26,7 +24,6 @@ async function main() {
     },
   });
 
-  // Normal user
   const normalUser = await prisma.user.upsert({
     where: { email: 'user@musicswipe.test' },
     update: {
@@ -41,7 +38,6 @@ async function main() {
     },
   });
 
-  // Deux tracks d’exemple
   const track1 = await prisma.track.upsert({
     where: { spotifyId: '3n3Ppam7vgaVa1iaRUc9Lp' },
     update: {},

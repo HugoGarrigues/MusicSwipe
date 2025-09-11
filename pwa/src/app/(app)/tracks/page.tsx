@@ -6,22 +6,24 @@ import type { Track } from "@/types";
 import { useEffect, useState } from "react";
 import { get } from "@/lib/http";
 import { api } from "@/config/api";
+import { useAuthContext } from "@/providers/AuthProvider";
 
 export default function TracksPage() {
   const [items, setItems] = useState<Track[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuthContext();
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await get<Track[]>(api.tracks());
+        const data = await get<Track[]>(api.tracks(), token ? { token } : {});
         setItems(data);
       } catch (e) {
         const message = e instanceof Error ? e.message : "Erreur";
         setError(message);
       }
     })();
-  }, []);
+  }, [token]);
 
   return (
     <div className="flex flex-col gap-4">
