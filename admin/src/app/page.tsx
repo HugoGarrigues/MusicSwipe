@@ -29,7 +29,11 @@ export default function DashboardPage() {
   useEffect(() => {
     let isMounted = true;
     const token = getTokenFromCookie();
-    if (!token) return;
+    if (!token) {
+      setError("Non authentifié. Veuillez vous connecter pour accéder au dashboard.");
+      setLoading(false);
+      return;
+    }
 
     async function load() {
       setLoading(true);
@@ -42,7 +46,7 @@ export default function DashboardPage() {
           fetch(api.users(), { headers, cache: "no-store" }),
           fetch(api.comments(), { headers, cache: "no-store" }),
           fetch(api.ratings(), { headers, cache: "no-store" }),
-          fetch(api.tracks(), { cache: "no-store" }),
+          fetch(api.tracks(), { headers, cache: "no-store" }),
         ]);
 
         if (!meRes.ok || !usersRes.ok || !commentsRes.ok || !ratingsRes.ok || !tracksRes.ok) {
