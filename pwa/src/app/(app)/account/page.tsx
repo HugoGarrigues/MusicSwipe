@@ -95,11 +95,17 @@ export default function AccountPage() {
             <div className="flex gap-3 overflow-x-auto no-scrollbar">
               {recentRated.map((rr, i) => (
                 <div key={i} className="shrink-0">
-                  <div className="w-20 h-20 rounded-xl bg-white/10 overflow-hidden">
-                    {rr.track?.coverUrl ? (
-                      <Image src={rr.track.coverUrl} alt={rr.track.title} width={80} height={80} className="w-20 h-20 object-cover" unoptimized />
-                    ) : null}
-                  </div>
+                  {rr.track ? (
+                    <a href={`/tracks/${rr.track.id}`} aria-label={`Voir ${rr.track.title}`}>
+                      <div className="w-20 h-20 rounded-xl bg-white/10 overflow-hidden">
+                        {rr.track.coverUrl ? (
+                          <Image src={rr.track.coverUrl} alt={rr.track.title} width={80} height={80} className="w-20 h-20 object-cover" unoptimized />
+                        ) : null}
+                      </div>
+                    </a>
+                  ) : (
+                    <div className="w-20 h-20 rounded-xl bg-white/10" />
+                  )}
                   <div className="mt-1 flex gap-0.5">
                     {Array.from({ length: 5 }).map((_, si) => (
                       <Star key={si} className={(si < rr.rating.score ? "fill-sky-400 text-sky-400" : "text-white/30") + " w-3 h-3"} />
