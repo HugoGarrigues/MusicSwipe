@@ -8,6 +8,7 @@ import { get, post, del } from "@/lib/http";
 import { api } from "@/config/api";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { setDiscoverActions, setDiscoverState } from "@/store/discover";
+import Image from "next/image";
 
 export default function MusicPage() {
   const { token } = useAuthContext();
@@ -47,7 +48,7 @@ export default function MusicPage() {
           const list = await get<Track[]>(api.tracks(), token ? { token } : {});
           setTracks(list);
           setIndex(0);
-        } catch { }
+        } catch {}
       }
     })();
   }, [token]);
@@ -62,7 +63,7 @@ export default function MusicPage() {
           const s = await get<{ liked: boolean }>(api.likeStatusByTrack(track.id), { token });
           setLiked(!!s?.liked);
         } else setLiked(false);
-      } catch { }
+      } catch {}
     })();
   }, [track, token]);
 
@@ -120,7 +121,7 @@ export default function MusicPage() {
         setTracks(list ?? []);
         setIndex(0);
       }
-    } catch { }
+    } catch {}
   }
 
   function next() {
@@ -136,31 +137,34 @@ export default function MusicPage() {
   function prev() { setIndex((i) => Math.max(i - 1, 0)); }
 
   return (
-    <div className="flex flex-col gap-4" >
+    <div className="flex flex-col gap-6">
       <div className="rounded-3xl p-5">
         <div className="grid grid-cols-1 gap-3">
-          <GlassPanel hideHeader className="p-6 flex justify-center items-center">
+          <GlassPanel hideHeader className="p-6 flex justify-center items-center font-semibold">
             {track ? track.albumName ?? "" : ""}
           </GlassPanel>
         </div>
-        <div className="flex flex-col items-center gap-3 mt-10">
-          {track?.coverUrl ? (
-            <img
-              src={track.coverUrl}
-              alt={track.title}
-              width={256}
-              height={256}
-              className="w-64 h-64 rounded-2xl object-cover"
-            />
-          ) : (
-            <div className="w-64 h-64 rounded-2xl bg-white/10" />
-          )}
-          <div className="text-lg font-semibold">{track?.title ?? "Chargement..."}</div>
-          <div className="text-sm text-white/70">{track?.artistName ?? ""}</div>
-          <RatingStars value={Math.round(avg?.average ?? 0)} onChange={handleRate} />
+        <div className="min-h-[70dvh] grid place-items-center">
+          <div className="flex flex-col items-center gap-4">
+            {track?.coverUrl ? (
+              <Image
+                src={track.coverUrl}
+                alt={track.title}
+                width={384}
+                height={384}
+                quality={90}
+                unoptimized
+                className="w-80 h-80 sm:w-96 sm:h-96 rounded-3xl object-cover shadow-lg shadow-black/30 ring-1 ring-white/10"
+              />
+            ) : (
+              <div className="w-80 h-80 sm:w-96 sm:h-96 rounded-3xl bg-white/10" />
+            )}
+            <div className="text-lg font-semibold text-center">{track?.title ?? "Chargement..."}</div>
+            <div className="text-sm text-white/70 text-center">{track?.artistName ?? ""}</div>
+            <RatingStars value={Math.round(avg?.average ?? 0)} onChange={handleRate} />
+          </div>
         </div>
       </div>
-
     </div>
   );
 }
