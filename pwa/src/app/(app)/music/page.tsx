@@ -170,16 +170,6 @@ export default function MusicPage() {
           </GlassPanel>
         ))}
       </div>
-
-
-      <div className="grid grid-cols-5 gap-3">
-        {[Star, Heart, Plus, ExternalLink, SkipForward].map((Icon, i) => (
-          <GlassPanel key={i} hideHeader className="aspect-square flex items-center justify-center">
-            <Icon className="w-6 h-6 text-white/90" />
-          </GlassPanel>
-        ))}
-      </div>
-
     </div>
   );
 }
