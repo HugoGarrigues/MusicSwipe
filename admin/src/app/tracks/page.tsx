@@ -38,7 +38,11 @@ export default function TracksPage() {
 
   async function deleteComment(c: Comment) {
     const token = getTokenFromCookie();
-    if (!token) return;
+    if (!token) {
+      setError("Non authentifié. Veuillez vous connecter pour accéder aux titres.");
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(api.comment(c.id), {
         method: "DELETE",
@@ -63,7 +67,7 @@ export default function TracksPage() {
         const headers = { Authorization: `Bearer ${token}` } as const;
         const [meRes, tracksRes, ratingsRes] = await Promise.all([
           fetch(api.me(), { headers, cache: "no-store" }),
-          fetch(api.tracks(), { cache: "no-store" }),
+          fetch(api.tracks(), { headers, cache: "no-store" }),
           fetch(api.ratings(), { headers, cache: "no-store" }),
         ]);
         if (!meRes.ok || !tracksRes.ok || !ratingsRes.ok) throw new Error("Erreur lors du chargement des données");
