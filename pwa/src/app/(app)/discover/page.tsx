@@ -1,17 +1,18 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import SwipeCard from "@/components/track/SwipeCard";
 import TrackCard from "@/components/track/TrackCard";
-import SwipeActionBar from "@/components/track/SwipeActionBar";
 import { get, post } from "@/lib/http";
 import { api } from "@/config/api";
 import { useAuthContext } from "@/providers/AuthProvider";
 import type { Track } from "@/types";
+import { setDiscoverActions, setDiscoverState } from "@/store/discover";
 
 export default function DiscoverPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [index, setIndex] = useState(0);
+  const [liked, setLiked] = useState(false);
   const { token } = useAuthContext();
   const sizeRef = useRef(25);
   const seenRef = useRef<Set<number>>(new Set());
@@ -75,19 +76,49 @@ export default function DiscoverPage() {
     next();
   }
 
+  // Expose current track + actions to BottomNav
+  useEffect(() => {
+    setDiscoverState({ track: track ?? null, liked });
+    if (!track) return;
+    (async () => {
+      try {
+        if (token) {
+          const s = await get<{ liked: boolean }>(api.likeStatusByTrack(track.id), { token });
+          setLiked(!!s?.liked);
+          setDiscoverState({ track, liked: !!s?.liked });
+        } else {
+          setLiked(false);
+          setDiscoverState({ track, liked: false });
+        }
+      } catch {}
+    })();
+    setDiscoverActions({
+      next,
+      toggleLike: async () => {
+        if (!track || !token) return;
+        try { await post(api.likeTrack(), { trackId: track.id }, { token }); } catch {}
+        setLiked(true);
+        setDiscoverState({ liked: true });
+      },
+      rate: async (score: number) => {
+        if (!track || !token) return;
+        try { await post(api.ratings(), { trackId: track.id, score }, { token }); } catch {}
+      },
+    });
+    return () => { setDiscoverState({ track: null }); };
+  }, [track, token, liked]);
+
   if (!track) {
-    return <p className="text-center text-white/70">Plus de titres. Revenez bientÃƒÆ’Ã‚Â´t !</p>;
+    return <p className="text-center text-white/70">Plus de titres. Revenez bient�t !</p>;
   }
 
   return (
     <div className="flex flex-col gap-3 pb-32">
-      <h1 className="text-xl font-semibold">DÃƒÆ’Ã‚Â©couvrir</h1>
+      <h1 className="text-xl font-semibold">D�couvrir</h1>
       <SwipeCard onSwipeLeft={next} onSwipeRight={likeAndNext}>
         <TrackCard track={track} />
-        <div className="mt-3 text-center text-xs text-white/60">Swipe ÃƒÂ¢Ã¢â‚¬Â Ã‚Â dislike Ãƒâ€šÃ‚Â· Swipe ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ like</div>
-        <div className="mt-3 text-center text-xs text-white/60">Swipe ← dislike · Swipe → like</div>
+        <div className="mt-3 text-center text-xs text-white/60">Swipe ? dislike � Swipe ? like</div>
       </SwipeCard>
-      <SwipeActionBar track={track} token={token} onNext={next} />
     </div>
   )
 }
