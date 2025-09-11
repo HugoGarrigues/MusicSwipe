@@ -139,12 +139,12 @@ export default function MusicPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="rounded-3xl p-5">
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3 mt-15">
           <GlassPanel hideHeader className="p-6 flex justify-center items-center font-semibold">
             {track ? track.albumName ?? "" : ""}
           </GlassPanel>
         </div>
-        <div className="min-h-[70dvh] grid place-items-center">
+        <div className="min-h-[60dvh] grid place-items-center">
           <div className="flex flex-col items-center gap-4">
             {track?.coverUrl ? (
               <Image

@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TABS, TabIcon } from "@/config/navigation";
 import GlassPanel from "@/components/ui/GlassPanel";
-import RatingStars from "@/components/ui/RatingStars";
 import { getDiscoverActions, getDiscoverState, subscribeDiscover } from "@/store/discover";
 import { Star, Heart, Plus, ExternalLink, SkipForward, Home as HomeIcon, Music as MusicIcon, User as UserIcon } from "lucide-react";
 
@@ -24,12 +23,12 @@ function Icon({ name, active }: { name: TabIcon; active: boolean }) {
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const onMusic = !!pathname?.startsWith("/music");
 
-  const router = useRouter();
   const [track, setTrack] = useState(getDiscoverState().track);
   const [liked, setLiked] = useState(getDiscoverState().liked);
-  const [showRating, setShowRating] = useState(false);
+  const [myRating, setMyRating] = useState(0);
   const actions = getDiscoverActions();
 
   useEffect(() => {
@@ -39,46 +38,38 @@ export default function BottomNav() {
     });
   }, []);
 
+  useEffect(() => { setMyRating(0); }, [track?.id]);
+
   return (
     <nav className="fixed bottom-3 left-0 right-0 mx-auto max-w-md px-4">
       {onMusic ? (
-        <>
-          {showRating && (
-            <GlassPanel className="mb-2 p-3">
-              <div className="text-center text-xs text-white/70 mb-2">Noter ce titre</div>
-              <div className="flex justify-center">
-                <RatingStars value={0} onChange={(v) => { setShowRating(false); actions.rate?.(v); }} />
-              </div>
-            </GlassPanel>
-          )}
-          <div className="grid grid-cols-5 gap-2 mb-2">
-            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
-              <button aria-label="Noter" onClick={() => setShowRating((v) => !v)}>
-                <Star className="w-6 h-6 text-white/90" />
-              </button>
-            </GlassPanel>
-            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
-              <button aria-label="Like" onClick={() => actions.toggleLike?.()}>
-                <Heart className={liked ? "w-6 h-6 text-pink-400" : "w-6 h-6 text-white/90"} />
-              </button>
-            </GlassPanel>
-            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
-              <button aria-label="Voir le son" onClick={() => track && router.push(`/tracks/${track.id}`)}>
-                <Plus className="w-6 h-6 text-white/90" />
-              </button>
-            </GlassPanel>
-            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
-              <button aria-label="Ouvrir sur Spotify" onClick={() => track?.spotifyId && window.open(`https://open.spotify.com/track/${track.spotifyId}`, "_blank")}>
-                <ExternalLink className="w-6 h-6 text-white/90" />
-              </button>
-            </GlassPanel>
-            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
-              <button aria-label="Suivant" onClick={() => actions.next?.()}>
-                <SkipForward className="w-6 h-6 text-white/90" />
-              </button>
-            </GlassPanel>
-          </div>
-        </>
+        <div className="grid grid-cols-5 gap-2 mb-2">
+          <GlassPanel hideHeader className="p-0 aspect-square overflow-hidden group transition-all duration-150 hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] active:scale-95">
+            <button aria-label="Augmenter la note" onClick={() => { const nv = (myRating % 5) + 1; setMyRating(nv); actions.rate?.(nv); }} className="w-full h-full grid place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+              <Star className="w-6 h-6 text-white/90 transition-transform duration-150 ease-out group-hover:scale-105" />
+            </button>
+          </GlassPanel>
+          <GlassPanel hideHeader className="p-0 aspect-square overflow-hidden group transition-all duration-150 hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] active:scale-95">
+            <button aria-label="Like" aria-pressed={liked} onClick={() => actions.toggleLike?.()} className="w-full h-full grid place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+              <Heart className={(liked ? "text-pink-400 " : "text-white/90 ") + "w-6 h-6 transition-transform duration-150 ease-out group-hover:scale-105"} />
+            </button>
+          </GlassPanel>
+          <GlassPanel hideHeader className="p-0 aspect-square overflow-hidden group transition-all duration-150 hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] active:scale-95">
+            <button aria-label="Voir le son" onClick={() => track && router.push(`/tracks/${track.id}`)} className="w-full h-full grid place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+              <Plus className="w-6 h-6 text-white/90 transition-transform duration-150 ease-out group-hover:scale-105" />
+            </button>
+          </GlassPanel>
+          <GlassPanel hideHeader className="p-0 aspect-square overflow-hidden group transition-all duration-150 hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] active:scale-95">
+            <button aria-label="Ouvrir sur Spotify" onClick={() => track?.spotifyId && window.open(`https://open.spotify.com/track/${track.spotifyId}`, "_blank")} className="w-full h-full grid place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+              <ExternalLink className="w-6 h-6 text-white/90 transition-transform duration-150 ease-out group-hover:scale-105" />
+            </button>
+          </GlassPanel>
+          <GlassPanel hideHeader className="p-0 aspect-square overflow-hidden group transition-all duration-150 hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] active:scale-95">
+            <button aria-label="Suivant" onClick={() => actions.next?.()} className="w-full h-full grid place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+              <SkipForward className="w-6 h-6 text-white/90 transition-transform duration-150 ease-out group-hover:scale-105" />
+            </button>
+          </GlassPanel>
+        </div>
       ) : null}
 
       <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_8px_30px_rgba(255,255,255,0.05)]">
