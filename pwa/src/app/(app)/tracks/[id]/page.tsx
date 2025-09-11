@@ -1,36 +1,45 @@
 "use client";
 
 import Card from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
 import RatingStars from "@/components/ui/RatingStars";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { api } from "@/config/api";
-import { get, post, del } from "@/lib/http";
-import { useEffect, useState } from "react";
-import type { Track, Comment, RatingAverage } from "@/types";
+import { get, post } from "@/lib/http";
+import { useEffect, useMemo, useState } from "react";
+import type { Track, Rating, RatingAverage } from "@/types";
+import Image from "next/image";
+import { ArrowLeft, MoreVertical, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Props = { params: { id: string } };
 
 export default function TrackDetailPage({ params }: Props) {
   const id = Number(params.id);
+  const router = useRouter();
   const { token } = useAuthContext();
 
   const [track, setTrack] = useState<Track | null>(null);
   const [avg, setAvg] = useState<RatingAverage | null>(null);
-  const [liked, setLiked] = useState<boolean>(false);
-  const [comments, setComments] = useState<Comment[] | null>(null);
-  const [newComment, setNewComment] = useState("");
+  const [ratings, setRatings] = useState<Rating[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  async function refreshRatings() {
+    if (!token) { setRatings(null); setAvg(null); return; }
+    try {
+      const [a, rs] = await Promise.all([
+        get<RatingAverage>(api.ratingAverageByTrack(id), { token }),
+        get<Rating[]>(`${api.ratings()}?trackId=${id}`, { token }),
+      ]);
+      setAvg(a);
+      setRatings(rs);
+    } catch {}
+  }
 
   useEffect(() => {
     (async () => {
       try {
-        const [t, a] = await Promise.all([
-          get<Track>(api.track(id), token ? { token } : {}),
-          get<RatingAverage>(api.ratingAverageByTrack(id), token ? { token } : {}),
-        ]);
+        const t = await get<Track>(api.track(id), token ? { token } : {});
         setTrack(t);
-        setAvg(a);
       } catch (e) {
         const message = e instanceof Error ? e.message : "Erreur";
         setError(message);
@@ -38,114 +47,96 @@ export default function TrackDetailPage({ params }: Props) {
     })();
   }, [id, token]);
 
-  useEffect(() => {
-    if (!token) return;
-    (async () => {
-      try {
-        const [s, cs] = await Promise.all([
-          get<{ trackId: number; liked: boolean }>(api.likeStatusByTrack(id), { token }),
-          get<Comment[]>(api.commentsByTrack(id), { token }),
-        ]);
-        setLiked(!!s?.liked);
-        setComments(cs);
-      } catch {}
-    })();
-  }, [id, token]);
+  useEffect(() => { refreshRatings(); }, [id, token]);
 
-  async function toggleLike() {
-    if (!token) return alert("Connectez-vous pour liker");
-    try {
-      if (liked) await del(api.unlikeTrack(id), { token });
-      else await post(api.likeTrack(), { trackId: id }, { token });
-      const s = await get<{ trackId: number; liked: boolean }>(api.likeStatusByTrack(id), { token });
-      setLiked(!!s?.liked);
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Erreur like";
-      alert(message);
-    }
-  }
+  const dist = useMemo(() => {
+    const d = [0,0,0,0,0];
+    for (const r of ratings ?? []) { if (r.score>=1 && r.score<=5) d[r.score-1]++; }
+    return d;
+  }, [ratings]);
 
   async function handleRate(v: number) {
     if (!token) return alert("Connectez-vous pour noter");
     try {
       await post(api.ratings(), { trackId: id, score: v }, { token });
-      const a = await get<{ trackId: number; average: number; count: number }>(api.ratingAverageByTrack(id), { token });
-      setAvg(a);
+      await refreshRatings();
     } catch (e) {
       const message = e instanceof Error ? e.message : "Erreur rating";
       alert(message);
     }
   }
 
-  async function submitComment() {
-    if (!token) return alert("Connectez-vous pour commenter");
-    if (!newComment.trim()) return;
-    try {
-      await post(api.comments(), { trackId: id, content: newComment.trim() }, { token });
-      setNewComment("");
-      const cs = await get<Comment[]>(api.commentsByTrack(id), { token });
-      setComments(cs);
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Erreur commentaire";
-      alert(message);
-    }
+  function formatDuration(sec?: number | null) {
+    if (!sec && sec !== 0) return "—";
+    const s = Math.max(0, Math.round(sec));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}:${r.toString().padStart(2, '0')}`;
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-24">
+      <div className="flex items-center justify-between px-1 pt-2">
+        <button aria-label="Retour" onClick={() => router.back()} className="p-2 -ml-2">
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <button aria-label="Plus" className="p-2 -mr-2">
+          <MoreVertical className="w-5 h-5 text-white" />
+        </button>
+      </div>
+
       {error && <Card className="p-3 text-red-400">{error}</Card>}
       {!track && <Card className="p-3 text-white/70">Chargement…</Card>}
       {track && (
         <>
-          <h1 className="text-xl font-semibold">{track.title}</h1>
-          <Card className="p-4">
+          <div className="flex flex-col items-center gap-3 mt-1">
             {track.coverUrl ? (
-              <img
-                src={track.coverUrl}
-                alt={track.title}
-                width={256}
-                height={256}
-                className="w-64 h-64 rounded-xl object-cover mb-4"
-              />
-            ) : null}
-            <div className="text-base font-semibold">{track.title}</div>
-            <div className="text-sm text-white/70">{track.artistName ?? "Artiste inconnu"}</div>
-            <div className="mt-3 flex items-center gap-3">
+              <Image src={track.coverUrl} alt={track.title} width={280} height={280} className="w-72 h-72 rounded-2xl object-cover" unoptimized />
+            ) : (
+              <div className="w-72 h-72 rounded-2xl bg-white/10" />
+            )}
+            <div className="text-xl font-semibold">{track.title}</div>
+            <div className="text-sm text-white/70">{track.artistName ?? "—"}</div>
+            <div className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2">
               <RatingStars value={Math.round(avg?.average ?? 0)} onChange={handleRate} />
-              {avg && <div className="text-sm text-white/70">{avg.average.toFixed(1)} ({avg.count})</div>}
+            </div>
+          </div>
+
+          <Card className="p-3">
+            <div className="flex items-center gap-3">
+              <Star className="w-4 h-4 text-white/40" />
+              <div className="flex-1 h-24 flex items-end gap-2">
+                {dist.map((v, i) => {
+                  const max = Math.max(1, ...dist);
+                  const h = Math.round((v / max) * 96);
+                  return <div key={i} className="w-6 bg-sky-400 rounded-t" style={{ height: `${h}px` }} />;
+                })}
+              </div>
+              <div className="text-xl font-semibold w-10 text-right">{avg ? avg.average.toFixed(1) : "—"}</div>
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className={(avg && i < Math.round(avg.average) ? "fill-sky-400 text-sky-400" : "text-white/30") + " w-3.5 h-3.5"} />
+                ))}
+              </div>
             </div>
           </Card>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={toggleLike}>{liked ? "💔 Unlike" : "❤️ Like"}</Button>
-          </div>
-          <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold">Commentaires</h2>
-            {token && (
-              <Card className="p-3">
-                <div className="flex gap-2">
-                  <input
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Votre commentaire"
-                    className="flex-1 bg-transparent border border-white/10 rounded px-3 py-2 outline-none"
-                  />
-                  <Button variant="primary" onClick={submitComment}>Envoyer</Button>
-                </div>
-              </Card>
-            )}
-            {comments?.length ? (
-              <Card className="divide-y divide-white/5">
-                {comments.map((c) => (
-                  <div key={c.id} className="p-3">
-                    <div className="text-sm">{c.content}</div>
-                    <div className="text-xs text-white/50">#{c.id}</div>
-                  </div>
-                ))}
-              </Card>
-            ) : (
-              <Card className="p-3 text-white/70">Aucun commentaire pour le moment</Card>
-            )}
-          </section>
+
+          <Card className="p-0 overflow-hidden">
+            <div className="grid grid-cols-2 divide-x divide-y divide-white/10">
+              <div className="p-3">
+                <div className="text-xs text-white/60">Album</div>
+                <div className="text-sm">{track.albumName ?? "—"}</div>
+              </div>
+              <div className="p-3">
+                <div className="text-xs text-white/60">Artists</div>
+                <div className="text-sm">{track.artistName ?? "—"}</div>
+              </div>
+              <div className="p-3">
+                <div className="text-xs text-white/60">Duration</div>
+                <div className="text-sm">{formatDuration(track.duration ?? undefined)}</div>
+              </div>
+            </div>
+          </Card>
         </>
       )}
     </div>
