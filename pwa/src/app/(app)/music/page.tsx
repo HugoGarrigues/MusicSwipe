@@ -9,6 +9,7 @@ import { api } from "@/config/api";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { setDiscoverActions, setDiscoverState } from "@/store/discover";
 import Image from "next/image";
+import SwipeCard from "@/components/track/SwipeCard";
 
 export default function MusicPage() {
   const { token } = useAuthContext();
@@ -176,6 +177,7 @@ export default function MusicPage() {
           </GlassPanel>
         </div>
         <div className="min-h-[60dvh] grid place-items-center">
+          <SwipeCard onSwipeLeft={next} onSwipeRight={prev} className="w-full">
           <div className="flex flex-col items-center gap-4">
             {track?.coverUrl ? (
               <Image
@@ -185,7 +187,7 @@ export default function MusicPage() {
                 height={384}
                 quality={90}
                 unoptimized
-                className="w-80 h-80 sm:w-96 sm:h-96 rounded-3xl object-cover shadow-lg shadow-black/30 ring-1 ring-white/10"
+                className="w-80 h-80 sm:w-96 sm:h-96 rounded-3xl object-cover"
               />
             ) : (
               <div className="w-80 h-80 sm:w-96 sm:h-96 rounded-3xl bg-white/10" />
@@ -194,6 +196,7 @@ export default function MusicPage() {
             <div className="text-sm text-white/70 text-center">{track?.artistName ?? ""}</div>
             <RatingStars value={Math.round(avg?.average ?? 0)} onChange={handleRate} />
           </div>
+          </SwipeCard>
         </div>
       </div>
     </div>
