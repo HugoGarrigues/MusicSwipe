@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { TABS, TabIcon } from "@/config/navigation";
 import GlassPanel from "@/components/ui/GlassPanel";
+import RatingStars from "@/components/ui/RatingStars";
+import { getDiscoverActions, getDiscoverState, subscribeDiscover } from "@/store/discover";
 import { Star, Heart, Plus, ExternalLink, SkipForward, Home as HomeIcon, Music as MusicIcon, User as UserIcon } from "lucide-react";
 
 function Icon({ name, active }: { name: TabIcon; active: boolean }) {
@@ -23,16 +26,59 @@ export default function BottomNav() {
   const pathname = usePathname();
   const onMusic = !!pathname?.startsWith("/music");
 
+  const router = useRouter();
+  const [track, setTrack] = useState(getDiscoverState().track);
+  const [liked, setLiked] = useState(getDiscoverState().liked);
+  const [showRating, setShowRating] = useState(false);
+  const actions = getDiscoverActions();
+
+  useEffect(() => {
+    return subscribeDiscover((s) => {
+      setTrack(s.track);
+      setLiked(s.liked);
+    });
+  }, []);
+
   return (
     <nav className="fixed bottom-3 left-0 right-0 mx-auto max-w-md px-4">
       {onMusic ? (
-        <div className="grid grid-cols-5 gap-2 mb-2">
-          {[Star, Heart, Plus, ExternalLink, SkipForward].map((IconCmp, i) => (
-            <GlassPanel key={i} hideHeader className="aspect-square flex items-center justify-center">
-              <IconCmp className="w-6 h-6 text-white/90" />
+        <>
+          {showRating && (
+            <GlassPanel className="mb-2 p-3">
+              <div className="text-center text-xs text-white/70 mb-2">Noter ce titre</div>
+              <div className="flex justify-center">
+                <RatingStars value={0} onChange={(v) => { setShowRating(false); actions.rate?.(v); }} />
+              </div>
             </GlassPanel>
-          ))}
-        </div>
+          )}
+          <div className="grid grid-cols-5 gap-2 mb-2">
+            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
+              <button aria-label="Noter" onClick={() => setShowRating((v) => !v)}>
+                <Star className="w-6 h-6 text-white/90" />
+              </button>
+            </GlassPanel>
+            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
+              <button aria-label="Like" onClick={() => actions.toggleLike?.()}>
+                <Heart className={liked ? "w-6 h-6 text-pink-400" : "w-6 h-6 text-white/90"} />
+              </button>
+            </GlassPanel>
+            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
+              <button aria-label="Voir le son" onClick={() => track && router.push(`/tracks/${track.id}`)}>
+                <Plus className="w-6 h-6 text-white/90" />
+              </button>
+            </GlassPanel>
+            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
+              <button aria-label="Ouvrir sur Spotify" onClick={() => track?.spotifyId && window.open(`https://open.spotify.com/track/${track.spotifyId}`, "_blank")}>
+                <ExternalLink className="w-6 h-6 text-white/90" />
+              </button>
+            </GlassPanel>
+            <GlassPanel hideHeader className="aspect-square flex items-center justify-center">
+              <button aria-label="Suivant" onClick={() => actions.next?.()}>
+                <SkipForward className="w-6 h-6 text-white/90" />
+              </button>
+            </GlassPanel>
+          </div>
+        </>
       ) : null}
 
       <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_8px_30px_rgba(255,255,255,0.05)]">

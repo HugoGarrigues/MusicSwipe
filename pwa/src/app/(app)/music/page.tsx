@@ -8,7 +8,6 @@ import { get, post, del } from "@/lib/http";
 import { api } from "@/config/api";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { setDiscoverActions, setDiscoverState } from "@/store/discover";
-import { Star, Heart, Plus, ExternalLink, SkipForward } from "lucide-react";
 
 export default function MusicPage() {
   const { token } = useAuthContext();
@@ -162,14 +161,6 @@ export default function MusicPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {[["Album", track?.albumName ?? "-"], ["Artists", track?.artistName ?? "-"], ["Release Date", "-"], ["Duration", track?.duration ? `${track.duration}s` : "-"]].map(([k, v], i) => (
-          <GlassPanel key={i} hideHeader className="p-3 text-sm">
-            <div className="text-white/60">{k as string}</div>
-            <div className="text-white/90">{v as string}</div>
-          </GlassPanel>
-        ))}
-      </div>
     </div>
   );
 }
